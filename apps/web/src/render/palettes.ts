@@ -10,10 +10,10 @@ export interface Palette {
 
 export const PALETTES: Record<PaletteName, Palette> = {
   'Felt Green': {
-    swatches: ['#1f4a3a', '#2e6b52', '#c0392b', '#e9c46a'],
+    swatches: ['#1f4a3a', '#2e6b52', '#c0392b', '#f0ce78'],
     vars: {
       '--bg': '#1c4435', '--surface': '#225239', '--surface-2': '#2c6347', '--surface-3': '#367556',
-      '--ink': '#f4f7f4', '--ink-dim': '#bcd4c6', '--accent': '#e9c46a', '--accent-ink': '#1c2a20',
+      '--ink': '#f4f7f4', '--ink-dim': '#c6dccf', '--accent': '#f0ce78', '--accent-ink': '#1c2a20',
       '--danger': '#c0392b', '--danger-ink': '#ffffff', '--line': '#3a6e54', '--focus': '#ffe08a',
       '--red-suit': '#ff6b6b', '--black-suit': '#f4f7f4',
     },

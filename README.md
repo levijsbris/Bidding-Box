@@ -77,3 +77,15 @@ Large high-contrast type and tap targets, four live-switchable palettes, suits
 identified by shape **and** label (never colour alone), a no-rotation Four-grids
 mode, an animations toggle that honours the OS reduced-motion setting, and
 optional (off-by-default) spoken bids.
+
+Treated as acceptance criteria, not polish, and held to **WCAG 2.1/2.2 AA**:
+
+- **Audited automatically** — `e2e/tests/a11y.spec.ts` runs axe-core over every
+  screen in all four palettes (desktop) and the compact layout (phone), checking
+  contrast, names/roles, and target sizes. All four palettes meet AA contrast.
+- **Keyboard** — Settings and Bid History are proper dialogs: focus moves in on
+  open, is trapped, closes on Escape, and returns to the trigger. Visible focus
+  rings throughout.
+- **Zoom** — pinch/zoom is allowed (no `user-scalable=no`).
+- **Screen readers** — `<main>` landmark; polite live regions announce whose
+  turn it is and the derived contract; all icon buttons carry labels.

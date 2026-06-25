@@ -1,6 +1,7 @@
 import { SEATS, type BidEntry, type Seat } from '../domain';
 import { useGame } from '../state/GameContext';
 import { CallLabel, Suit } from '../render/Suit';
+import { useDialog } from '../render/useDialog';
 import { resultText } from '../screens/result';
 
 /** Build the auction as a four-column table headed by seat, dealer first. */
@@ -57,6 +58,7 @@ function AuctionTable({ bids, dealer }: { bids: BidEntry[]; dealer: Seat }) {
 /** US-16: the full auction, dual-flipped so both long sides can read it. */
 export function BidHistory() {
   const { state, historyBoard, setHistoryBoard } = useGame();
+  const dialogRef = useDialog<HTMLDivElement>(() => setHistoryBoard(null));
   if (historyBoard == null) return null;
 
   let bids: BidEntry[];
@@ -106,7 +108,15 @@ export function BidHistory() {
 
   return (
     <div className="bh-overlay" onClick={() => setHistoryBoard(null)}>
-      <div className="bh-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="bh-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="bh-zone bh-zone--top">
           <Panel />
         </div>

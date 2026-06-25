@@ -45,6 +45,20 @@ test('F8: palette and settings overlay open', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'New Game' })).toBeVisible();
 });
 
+// Keyboard accessibility: the Settings dialog opens with focus moved into it,
+// closes on Escape, and returns focus to the trigger.
+test('Settings dialog: Escape closes and restores focus', async ({ page }, info) => {
+  test.skip(info.project.name === 'phone', 'keyboard interaction');
+  await page.goto('/');
+  const cog = page.getByRole('button', { name: 'Settings' });
+  await cog.click();
+  const dialog = page.getByRole('dialog', { name: 'Settings' });
+  await expect(dialog).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(cog).toBeFocused();
+});
+
 // Regression: special call buttons (Pass/X/XX) must keep their gold background on
 // hover — the generic green hover used to bleed through and stick under the
 // cursor after a click, showing green-on-black for the next bidder.
@@ -54,8 +68,8 @@ test('Pass button stays gold on hover', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Start Game' }).click();
   const pass = page.getByRole('button', { name: 'Pass', exact: true });
   await pass.hover();
-  // Felt Green accent (gold), not the green hover surface (rgb(54,117,86)).
+  // Felt Green accent (gold, #f0ce78), not the green hover surface (rgb(54,117,86)).
   await expect.poll(() => pass.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
-    'rgb(233, 196, 106)',
+    'rgb(240, 206, 120)',
   );
 });

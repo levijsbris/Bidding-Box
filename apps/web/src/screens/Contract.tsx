@@ -1,4 +1,4 @@
-import { partnerOf, leftOf, SEATS, type Seat } from '../domain';
+import { partnerOf, leftOf, SEATS, STRAIN_LABEL, type Seat } from '../domain';
 import { useGame } from '../state/GameContext';
 import { TopBar } from '../components/TopBar';
 import { RotateWrap } from '../render/RotateWrap';
@@ -14,6 +14,9 @@ export function Contract() {
     return (
       <div className="app-shell">
         <TopBar centerLabel="Game" />
+        <div className="sr-only" role="status" aria-live="polite">
+          Passed out. No contract this board.
+        </div>
         <div className="center-col">
           <h1 className="h1" style={{ fontSize: '2.4rem' }}>
             Passed Out
@@ -69,9 +72,13 @@ export function Contract() {
 
   const byRole = Object.fromEntries(SEATS.map((s) => [s, <Badge key={s} seat={s} />]));
 
+  const spokenDbl = c.doubled === 'doubled' ? ' doubled' : c.doubled === 'redoubled' ? ' redoubled' : '';
   return (
     <div className="app-shell">
       <TopBar centerLabel="Game" />
+      <div className="sr-only" role="status" aria-live="polite">
+        {`Contract ${c.level} ${STRAIN_LABEL[c.strain]}${spokenDbl} by ${declarer}.`}
+      </div>
       <div className="screen-body">
         <div className="contract-grid">
           <div className="role role--north">

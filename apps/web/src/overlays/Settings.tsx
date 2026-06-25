@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useGame } from '../state/GameContext';
 import { PALETTES, PALETTE_NAMES } from '../render/palettes';
+import { useDialog } from '../render/useDialog';
 import { serializeGame, deserializeGame, exportFilename, ImportError } from '../state/exportImport';
 
 /** US-7/US-9/US-12: appearance, bidding layout, motion, and sound — plus game
@@ -10,6 +11,7 @@ export function Settings() {
   const { settings } = state;
   const fileRef = useRef<HTMLInputElement>(null);
   const [importMsg, setImportMsg] = useState<string | null>(null);
+  const dialogRef = useDialog<HTMLDivElement>(() => setSettingsOpen(false));
 
   // Highlight what is actually rendering: the effective mode (Compact on a
   // phone), which may differ from the saved tablet choice.
@@ -64,9 +66,17 @@ export function Settings() {
 
   return (
     <div className="settings-overlay" onClick={() => setSettingsOpen(false)}>
-      <div className="settings-sheet" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="settings-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+        tabIndex={-1}
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="settings-head">
-          <h2 className="h1" style={{ margin: 0, fontSize: '2rem' }}>
+          <h2 id="settings-title" className="h1" style={{ margin: 0, fontSize: '2rem' }}>
             Settings
           </h2>
           <button className="icon-btn" onClick={() => setSettingsOpen(false)} aria-label="Close settings">

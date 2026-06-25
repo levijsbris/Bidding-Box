@@ -14,5 +14,5 @@ test('reload mid-game resumes from local storage', async ({ page }, info) => {
 
   // Still in the auction (New Game's Start button is gone).
   await expect(page.getByRole('button', { name: 'Start Game' })).toHaveCount(0);
-  await expect(page.getByText("'s turn")).toBeVisible();
+  await expect(page.locator('.pill--turn')).toContainText("'s turn");
 });

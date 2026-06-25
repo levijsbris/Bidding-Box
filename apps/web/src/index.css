@@ -48,6 +48,8 @@ body{background:#0d0d0f;color:var(--ink);font-family:var(--font-body);-webkit-fo
 [data-device="mobile"] .special-row .call-btn{min-height:46px}
 button{font-family:inherit;color:var(--ink);cursor:pointer;border:none;background:none}
 button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* Visually hidden but available to screen readers (used for live announcements). */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .no-anim *{transition:none !important;animation:none !important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 

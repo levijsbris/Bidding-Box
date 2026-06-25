@@ -25,6 +25,11 @@ export function Bidding() {
   return (
     <div className="app-shell">
       <TopBar centerLabel={label} />
+      {/* Announce turn changes to screen readers (the visual turn pill is hidden on
+          phones and isn't a live region). */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {label}
+      </div>
       <div className="screen-body">
         {display.layout === 'fourGrids' ? <FourGrids turn={turn} /> : <AutoLayout turn={turn} />}
       </div>

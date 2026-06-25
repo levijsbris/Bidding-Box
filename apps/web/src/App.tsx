@@ -29,7 +29,7 @@ export function App() {
         className={simulatePhone ? 'preview--mobile' : ''}
         data-device={deviceMobile ? 'mobile' : 'desktop'}
       >
-        <div id="app">
+        <main id="app">
           {screen === 'newGame' && <NewGame />}
           {screen === 'bidding' && <Bidding />}
           {screen === 'contract' && <Contract />}
@@ -37,7 +37,7 @@ export function App() {
           {screen === 'score' && <Score />}
           {settingsOpen && <Settings />}
           {historyBoard != null && <BidHistory />}
-        </div>
+        </main>
       </div>
       {/* Dev-only preview affordance: Auto follows the real viewport; Desktop/Mobile
           pin a size for testing. The shipped app is purely viewport-responsive. */}
