@@ -6,11 +6,14 @@ import { VitePWA } from 'vite-plugin-pwa';
 // Offline-first single-device app. The PWA service worker caches the app shell so
 // the game loads and plays with no network (ARCHITECTURE.md §12).
 export default defineConfig({
+  // '/' for local dev/preview and custom-domain hosting; the GitHub Pages build
+  // sets VITE_BASE=/Bidding-Box/ so asset URLs resolve under the project path.
+  base: process.env.VITE_BASE || '/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Bridge Table Companion',
         short_name: 'Bridge',
@@ -20,7 +23,9 @@ export default defineConfig({
         display: 'fullscreen',
         orientation: 'any',
         icons: [
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
