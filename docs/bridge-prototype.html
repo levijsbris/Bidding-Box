@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Bridge Bidding — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#1c4435; --surface:#225239; --surface-2:#2c6347; --surface-3:#367556;
+  --ink:#f4f7f4; --ink-dim:#bcd4c6; --accent:#e9c46a; --accent-ink:#1c2a20;
+  --danger:#c0392b; --danger-ink:#fff; --line:#3a6e54; --focus:#ffe08a;
+  --red-suit:#ff6b6b; --black-suit:#f4f7f4;
+  --tap:56px; --cell:42px;
+  --font-display:'Fraunces',Georgia,serif; --font-body:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#0d0d0f;color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;overflow:hidden}
+#preview{height:100%;width:100%;display:flex;align-items:center;justify-content:center;background:#0d0d0f}
+#preview #app{height:100%;width:100%;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;position:relative}
+/* mobile preview: constrain app to a phone frame */
+#preview.preview--mobile{padding:24px}
+#preview.preview--mobile #app{width:390px;height:100%;max-height:844px;border-radius:36px;box-shadow:0 0 0 10px #1b1b1f,0 0 0 12px #303036,0 30px 60px rgba(0,0,0,.5)}
+/* device toggle */
+#device-toggle{position:fixed;top:12px;right:12px;z-index:200;display:flex;gap:4px;background:#16161a;border:1px solid #2a2a30;border-radius:10px;padding:4px}
+#device-toggle button{border:none;background:transparent;color:#b8b8c0;font-family:inherit;font-weight:700;font-size:.8rem;padding:7px 13px;border-radius:7px;cursor:pointer}
+#device-toggle button.dt-on{background:var(--accent);color:var(--accent-ink)}
+/* mobile preview sizing: shrink to fit the phone frame */
+[data-device="mobile"] .grid-wrap{--cell:36px;padding:9px}
+/* mobile: hide the turn pill so the top bar doesn't wrap */
+[data-device="mobile"] .pill--turn{display:none}
+/* mobile top bar: no wrap, smaller pills so cog stays on row 1 */
+[data-device="mobile"] .topbar{flex-wrap:nowrap;gap:5px;padding:8px 9px}
+[data-device="mobile"] .topbar .pill{font-size:.66rem;padding:5px 7px}
+[data-device="mobile"] .topbar .icon-btn{flex:0 0 auto;width:34px;height:34px}
+/* disabled grid choices (mobile) */
+.grid-choice:disabled{opacity:.45;cursor:not-allowed}
+.gc-reason{display:block;font-size:.62rem;color:var(--ink-dim);font-weight:600;margin-top:2px}
+/* mobile compact: all seats share a consistent, readable strip size (no per-seat shrink) */
+[data-device="mobile"] .bid-seat{padding:7px 9px;gap:8px;border-width:2px}
+[data-device="mobile"] .bc-card{min-width:42px;min-height:46px;padding:5px 7px}
+[data-device="mobile"] .bc-lvl{font-size:1.25rem}
+[data-device="mobile"] .bc-word{font-size:1rem}
+[data-device="mobile"] .bc-name{font-size:.85rem}
+[data-device="mobile"] .bc-back{width:42px;height:42px;font-size:1.25rem}
+/* mobile compact: pull side seats to a safe inset so rotated strips clear the edges */
+[data-device="mobile"] .seat-pos--west{left:48px}
+[data-device="mobile"] .seat-pos--east{right:48px}
+[data-device="mobile"] .grid-wrap{--cell:34px;padding:7px}
+/* mobile compact: narrower & taller — levels wrap to two rows of 4 */
+[data-device="mobile"] .compact-levels{grid-template-columns:repeat(4,var(--cell))}
+[data-device="mobile"] .compact-strains{grid-template-columns:repeat(5,30px)}
+[data-device="mobile"] .compact-strains .call-btn{width:30px}
+button{font-family:inherit;color:var(--ink);cursor:pointer;border:none;background:none}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.no-anim *{transition:none !important;animation:none !important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.app-shell{height:100%;display:flex;flex-direction:column;background:var(--bg)}
+.topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;flex:0 0 auto;flex-wrap:wrap}
+.pill{padding:7px 12px;border-radius:10px;font-weight:700;font-size:.85rem;background:var(--surface-2);color:var(--ink);white-space:nowrap}
+.pill--vul{background:var(--danger);color:var(--danger-ink)}
+.pill--safe{background:var(--surface);color:var(--ink-dim)}
+.pill--accent,.pill--score{background:var(--accent);color:var(--accent-ink)}
+.topbar .spacer{flex:1}
+.icon-btn{width:var(--tap);height:var(--tap);border-radius:12px;display:grid;place-items:center;background:transparent;color:var(--ink);font-size:1.4rem}
+.icon-btn:hover{background:var(--surface-2)}
+.screen-body{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}
+
+.call-btn{min-width:var(--cell);min-height:var(--cell);border-radius:12px;background:var(--surface-2);color:var(--ink);font-weight:700;display:grid;place-items:center;line-height:1.05;transition:transform .12s,background .12s;border:2px solid transparent}
+.call-btn:hover:not(:disabled){background:var(--surface-3)}
+.call-btn:active:not(:disabled){transform:scale(.96)}
+.call-btn:disabled{opacity:.32;cursor:not-allowed}
+.call-btn--selected{border-color:var(--accent)}
+.call-btn--special{background:var(--accent);color:var(--accent-ink)}
+.suit-red{color:var(--red-suit)}
+.suit-black{color:var(--black-suit)}
+.h1{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em}
+.center-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:24px}
+
+.toggle{width:64px;height:36px;border-radius:18px;background:var(--surface);position:relative;transition:background .15s;border:1px solid var(--line)}
+.toggle[data-on='true']{background:var(--surface-3)}
+.toggle .knob{position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:var(--ink-dim);transition:transform .15s,background .15s}
+.toggle[data-on='true'] .knob{transform:translateX(28px);background:var(--accent)}
+
+.btn-primary{background:transparent;border:2px solid var(--ink);color:var(--ink);border-radius:12px;padding:14px 28px;font-size:1.1rem;font-weight:700;min-height:var(--tap)}
+.btn-primary:hover{background:var(--surface-2)}
+.btn-primary--filled{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* bidding grid */
+.grid-wrap{background:var(--surface);border-radius:18px;padding:12px;display:inline-flex;flex-direction:column;gap:10px;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.grid-table{display:flex;flex-direction:column;gap:6px}
+.grid-row{display:grid;grid-template-columns:24px repeat(5,var(--cell));gap:6px;align-items:center}
+.row-label{text-align:center;font-weight:800;font-size:1.1rem}
+.grid-cell{min-width:var(--cell);min-height:var(--cell);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.cell-level{font-size:.95rem;font-weight:800}
+.grid-compact{display:flex;flex-direction:column;gap:10px;align-items:center}
+.compact-levels{display:grid;grid-template-columns:repeat(7,var(--cell));gap:8px;justify-content:center}
+.compact-levels .call-btn{font-size:1.3rem}
+.compact-hint{font-size:.85rem;color:var(--ink-dim);font-weight:600}
+.compact-strains{display:grid;grid-template-columns:repeat(5,var(--cell));gap:8px}
+.special-row{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:8px}
+.special-pass{font-size:1.05rem}
+
+/* seat badge */
+.seat-badge{background:var(--surface-2);border-radius:10px;padding:8px 14px;font-weight:700;text-align:center;color:var(--ink-dim);border:2px solid transparent;min-width:80px}
+.seat-badge--active{background:var(--accent);color:var(--accent-ink);border-color:var(--focus)}
+.seat-cue{display:block;font-size:.7rem;font-weight:600;margin-top:2px}
+
+/* auto-rotate layout */
+.auto-layout{position:absolute;inset:0}
+.auto-center{position:absolute;top:50%;left:50%;width:0;height:0}
+.seat-pos{position:absolute;width:0;height:0}
+.seat-pos--north{top:66px;left:50%}
+.seat-pos--south{bottom:90px;left:50%}
+.seat-pos--west{left:90px;top:50%}
+.seat-pos--east{right:90px;top:50%}
+
+/* manual layout */
+.manual-layout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.manual-controls{display:flex;align-items:center;gap:16px}
+.manual-hint{font-weight:700;font-size:1.1rem}
+
+/* four edges */
+.edges-layout{position:absolute;inset:0}
+.edges-center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.edges-auction{display:flex;align-items:center;gap:12px;pointer-events:auto}
+.edge{position:absolute;transform-origin:center center}
+.edge-south{bottom:8px;left:50%;margin-left:-180px}
+.edge-north{top:8px;left:50%;margin-left:-180px}
+.edge-west{left:-140px;top:50%;margin-top:-180px}
+.edge-east{right:-140px;top:50%;margin-top:-180px}
+.edge-wait{display:grid;place-items:center;padding:20px}
+
+/* auction strip */
+.auction-strip{background:var(--surface);border-radius:12px;padding:10px 12px;min-width:260px}
+.auction-head,.auction-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.auction-head{font-weight:800;color:var(--ink-dim);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px}
+.auction-cell{padding:3px 0;font-weight:700}
+.auction-empty{text-align:center;color:var(--ink-dim);padding:8px}
+.call-inline{display:inline-flex;align-items:center;gap:2px;font-weight:700}
+
+/* contract screen */
+.contract-grid{position:absolute;inset:12px 12px 90px 12px;display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto 1fr auto;grid-template-areas:". north ." "west center east" ". south ."}
+.role{display:grid;place-items:center}
+.role--north{grid-area:north}.role--south{grid-area:south}
+.role--west{grid-area:west;min-width:120px}.role--east{grid-area:east;min-width:120px}
+.role--center{grid-area:center}
+.role-badge{background:var(--surface-2);border-radius:14px;padding:14px 22px;text-align:center;border:2px solid transparent;min-width:130px}
+.role-badge--decl{background:var(--accent);color:var(--accent-ink);border-color:var(--focus)}
+.role-seat{font-weight:800;font-size:1.3rem}
+.role-name{font-size:.95rem;font-weight:600;margin-top:2px}
+.role-note{font-size:.78rem;margin-top:2px;opacity:.85}
+.contract-card{background:var(--surface-2);border-radius:18px;padding:28px 40px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+
+/* four-sided contract card: contract repeated facing each edge */
+.fourcard{position:relative;width:220px;height:220px;background:var(--surface-2);border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.fc-edge{position:absolute;display:flex;align-items:center;justify-content:center;gap:4px;font-size:1.7rem;font-weight:800;font-family:var(--font-display);line-height:1;left:50%;transform-origin:center}
+.fc-edge--top{top:14px;transform:translateX(-50%) rotate(180deg)}
+.fc-edge--bottom{bottom:14px;transform:translateX(-50%)}
+.fc-edge--left{left:14px;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:center;left:auto}
+.fc-edge--left{left:6px;top:50%;transform:translate(0,-50%) rotate(90deg)}
+.fc-edge--right{right:6px;top:50%;left:auto;transform:translate(0,-50%) rotate(-90deg)}
+.fc-dbl{font-size:1rem;color:var(--accent)}
+.fc-centre{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--ink-dim)}
+.fc-by{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
+.fc-by-seat{font-size:1.1rem;font-weight:800;color:var(--ink)}
+.contract-big{display:flex;align-items:center;justify-content:center;gap:6px;font-size:3.4rem;font-weight:800;font-family:var(--font-display)}
+.contract-meta{margin-top:6px;font-weight:700}
+.contract-decl{margin-top:4px;color:var(--ink-dim)}
+.contract-actions{position:absolute;left:0;right:0;bottom:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+
+/* score */
+.score-scroll{flex:1;overflow-y:auto;padding:12px 20px 24px;display:flex;flex-direction:column;align-items:center}
+.score-title{font-size:3rem;margin:8px 0 24px;text-align:center}
+.score-table{width:100%;max-width:760px;border-collapse:collapse;font-size:1rem}
+.score-table th{background:var(--surface-2);padding:10px 8px;font-weight:700;border-radius:6px}
+.score-table td{padding:12px 8px;text-align:center;font-weight:600}
+.score-table tbody tr{border-bottom:1px solid var(--line)}
+.score-actions{margin-top:auto;padding-top:32px;display:flex;gap:12px;align-items:center}
+
+/* dual-zone split score (readable from both long sides of the table) */
+.score-split{flex:1;display:flex;flex-direction:column;min-height:0}
+.score-zone{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:10px 16px}
+.score-zone--top{transform:rotate(180deg)}
+.score-seam{height:2px;background:var(--line);flex:0 0 auto}
+.score-panel{width:100%;max-width:680px;display:flex;flex-direction:column;align-items:center}
+.score-panel .score-title{font-size:1.7rem;margin:2px 0 10px}
+.score-panel .score-table{font-size:.86rem}
+.score-panel .score-table th{padding:7px 6px}
+.score-panel .score-table td{padding:8px 6px}
+.score-panel .score-actions{padding-top:14px;margin-top:10px}
+.score-panel .score-actions .btn-primary{padding:9px 16px;font-size:.92rem;min-height:42px}
+.score-panel .score-actions .icon-btn{width:42px;height:42px}
+
+/* four-grids bidding mode */
+.fg-grid{background:var(--surface);border-radius:16px;padding:12px 13px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:8px;align-items:center;opacity:.5}
+.fg-grid--active{opacity:1;box-shadow:0 8px 24px rgba(0,0,0,.25),0 0 0 2px var(--accent)}
+.fg-name{font-weight:800;font-size:.95rem}
+.fg-turn{display:block;font-size:.66rem;font-weight:700;color:var(--accent);text-align:center}
+.fg-levels{display:grid;grid-template-columns:repeat(7,38px);gap:5px}
+.fg-suits{display:grid;grid-template-columns:repeat(5,42px);gap:5px}
+.fg-cell{height:40px;border-radius:9px;font-size:1.1rem;font-weight:800;min-height:0;padding:0}
+.fg-spec{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:5px;width:100%}
+.fg-spec .call-btn{height:38px;min-height:0;font-size:.95rem;padding:0}
+.fg-back{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 18px;border-radius:18px;background:transparent;color:var(--ink);font-weight:700;font-size:.9rem;border:2px solid var(--line)}
+.fg-back:hover:not(:disabled){background:var(--surface-2);border-color:var(--surface-3)}
+.fg-back:disabled{opacity:.32;cursor:not-allowed}
+/* four-grids seat positions: pull in so taller rotated blocks stay on screen */
+/* four-grids edge layout: each block pinned to its own edge and rotated about that edge,
+   so it always grows inward and never clips off-screen. A JS-measured --fg-scale shrinks
+   the whole cluster to fit smaller viewports. */
+.fg-layout{--fg-scale:1}
+.fg-seat{position:absolute;display:flex;justify-content:center}
+.fg-seat-inner{transform-origin:center;transform:scale(var(--fg-scale))}
+.fg-seat--south{left:0;right:0;bottom:8px}
+.fg-seat--south .fg-seat-inner{transform:scale(var(--fg-scale));transform-origin:bottom center}
+.fg-seat--north{left:0;right:0;top:8px}
+.fg-seat--north .fg-seat-inner{transform:scale(var(--fg-scale)) rotate(180deg);transform-origin:center}
+.fg-seat--west{top:0;bottom:0;left:8px;flex-direction:column}
+.fg-seat--west .fg-seat-inner{transform:scale(var(--fg-scale)) rotate(90deg);transform-origin:center}
+.fg-seat--east{top:0;bottom:0;right:8px;flex-direction:column}
+.fg-seat--east .fg-seat-inner{transform:scale(var(--fg-scale)) rotate(270deg);transform-origin:center}
+.fg-seat--west,.fg-seat--east{align-items:center;justify-content:center}
+/* bid-card strip above each grid */
+.fg-block{display:flex;flex-direction:column;align-items:center;gap:8px}
+.fg-bids{display:flex;align-items:center;gap:8px;min-height:46px;flex-wrap:wrap;justify-content:center;max-width:340px}
+.fgb-card{background:var(--surface-2);border-radius:10px;padding:6px 13px;font-weight:800;font-size:1.55rem;display:inline-flex;align-items:center;gap:3px;line-height:1}
+.fgb-empty{color:var(--ink-dim);font-size:.95rem;font-weight:600}
+.fgb-more{color:var(--ink-dim);font-size:.95rem;font-weight:700}
+/* two-sided trick counter */
+.trick-split{flex:1;display:flex;flex-direction:column;min-height:0}
+.trick-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:14px}
+.trick-zone--top{transform:rotate(180deg)}
+.trick-seam{height:2px;background:var(--line);flex:0 0 auto}
+.trick-prompt{text-align:center}
+.trick-q{font-size:1.5rem;font-weight:800;font-family:var(--font-display)}
+.trick-contract{color:var(--ink-dim);margin-top:4px;display:flex;align-items:center;gap:5px;justify-content:center}
+.trick-contract strong{color:var(--ink);display:inline-flex;align-items:center;gap:4px}
+.trick-counter{display:flex;align-items:center;gap:18px}
+.trick-btn{width:72px;height:72px;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-size:2.2rem;font-weight:800;display:grid;place-items:center;border:none;cursor:pointer}
+.trick-num{width:104px;height:104px;border-radius:18px;background:var(--surface-2);display:grid;place-items:center;font-size:3.4rem;font-weight:800;font-family:var(--font-display)}
+.trick-actions{display:flex;gap:12px}
+
+/* dual-flip bid history popup */
+.bh-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:60}
+.bh-modal{background:var(--bg);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:100%;max-width:460px;height:min(86%,640px);display:flex;flex-direction:column;overflow:hidden}
+.bh-zone{flex:1;min-height:0;display:flex;justify-content:center;overflow:hidden}
+.bh-zone--top{transform:rotate(180deg)}
+.bh-panel{width:100%;max-width:360px;display:flex;flex-direction:column;min-height:0}
+.bh-scroll{overflow-y:auto;padding:10px 12px;min-height:0}
+.bh-bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.bh-title{font-weight:800;font-size:1rem}
+.bh-sub{font-size:.82rem;color:var(--ink-dim);display:inline-flex;align-items:center;gap:3px}
+.bh-spacer{flex:1}
+.bh-table{width:100%;border-collapse:collapse}
+.bh-table th{background:var(--surface-2);padding:7px 6px;font-weight:800;font-size:.8rem;position:sticky;top:0}
+.bh-table th em{display:block;font-size:.56rem;color:var(--accent);font-weight:700;font-style:normal}
+.bh-table td{padding:8px 6px;text-align:center;font-weight:700;border-bottom:1px solid var(--line);font-size:.92rem}
+.bh-empty{color:var(--ink-dim);font-weight:600}
+
+/* settings */
+.settings-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto;z-index:50}
+.settings-sheet{background:var(--bg);width:100%;max-width:720px;border-radius:18px;padding:16px 20px 28px}
+.settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.settings-card{background:var(--surface);border-radius:16px;padding:18px;margin-bottom:16px}
+.settings-card h3{margin:0 0 12px;font-size:1.5rem}
+.settings-label{font-weight:800;margin:14px 0 0}
+.settings-sub{margin:2px 0 10px;color:var(--ink-dim);font-style:italic;font-size:.9rem}
+.palette-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.palette-card{background:var(--surface-2);border-radius:12px;padding:8px;border:2px solid transparent}
+.palette-card--active{border-color:var(--accent)}
+.palette-swatches{display:grid;grid-template-columns:repeat(4,1fr);height:44px;border-radius:8px;overflow:hidden}
+.palette-name{display:block;margin-top:6px;font-size:.85rem;font-weight:600}
+.grid-choice-row{display:flex;gap:12px}
+.grid-choice{background:var(--surface-2);border-radius:12px;padding:12px;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600;min-width:110px}
+/* mobile settings: keep option cards a consistent size and let the rows scroll horizontally */
+[data-device="mobile"] .palette-row{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:10px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+[data-device="mobile"] .palette-card{flex:0 0 112px;width:112px}
+[data-device="mobile"] .grid-choice-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+[data-device="mobile"] .grid-choice{flex:0 0 120px;width:120px}
+[data-device="mobile"] .palette-row::-webkit-scrollbar,[data-device="mobile"] .grid-choice-row::-webkit-scrollbar{height:6px}
+[data-device="mobile"] .palette-row::-webkit-scrollbar-thumb,[data-device="mobile"] .grid-choice-row::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.grid-choice--active{border-color:var(--accent)}
+.grid-choice-mini{width:70px;height:70px;border-radius:8px;background:var(--surface-3)}
+.grid-choice-mini--table{background-image:repeating-linear-gradient(var(--line) 0 2px,transparent 2px 12px)}
+.grid-choice-mini--compact{background-image:radial-gradient(var(--line) 30%,transparent 32%);background-size:20px 20px}
+.grid-choice-mini--four{background-image:linear-gradient(var(--line) 0 0),linear-gradient(var(--line) 0 0),linear-gradient(var(--line) 0 0),linear-gradient(var(--line) 0 0);background-repeat:no-repeat;background-size:24px 8px,24px 8px,8px 24px,8px 24px;background-position:center 8px,center 54px,8px center,54px center}
+.seg{display:flex;gap:6px;background:var(--surface-2);padding:4px;border-radius:12px}
+.seg-btn{flex:1;padding:10px;border-radius:9px;font-weight:700;color:var(--ink-dim)}
+.seg-btn--active{background:var(--accent);color:var(--accent-ink)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+.row-flex{display:flex;justify-content:space-between;align-items:center;gap:16px}
+
+/* per-seat bid cards: horizontal strip — arrow+name at left, cards in a row */
+.bid-seat{display:flex;flex-direction:row;align-items:center;gap:10px;background:var(--surface);border-radius:16px;padding:10px 12px;border:2px solid transparent}
+.bid-seat--active{border-color:var(--accent)}
+.bc-head{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto}
+.bc-name{font-weight:800;font-size:1rem;text-align:center;line-height:1.05}
+.bc-turn{display:block;font-size:.68rem;font-weight:700;color:var(--accent)}
+.bid-seat--active .bc-name{color:var(--accent)}
+.bc-cards{display:flex;flex-direction:row;align-items:center;gap:8px}
+.bc-card{background:var(--surface-2);border-radius:12px;min-width:56px;min-height:60px;padding:8px 10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid transparent}
+.bc-card--newest{border-color:var(--accent)}
+.bc-bid{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1}
+.bc-lvl{font-size:1.5rem;font-weight:800}
+.bc-word{font-size:1.25rem;font-weight:800}
+.bc-more{color:var(--ink-dim);font-size:.85rem;font-weight:700;padding:0 4px}
+.bc-empty{color:var(--ink-dim);font-size:.95rem;padding:8px 14px;min-height:48px;display:grid;place-items:center}
+.bc-back{width:52px;height:52px;border-radius:50%;background:transparent;color:var(--ink);font-size:1.45rem;display:grid;place-items:center;flex:0 0 auto;border:2px solid var(--line)}
+.bc-back:hover:not(:disabled){background:var(--surface-2);border-color:var(--surface-3)}
+.bc-back:disabled{opacity:.3;cursor:not-allowed;border-color:var(--line);color:var(--ink-dim)}
+.bc-back--live{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
+.auction-head em{display:block;font-size:.6rem;font-weight:700;font-style:normal;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+.auction-cell--filled{background:var(--surface-2);border-radius:7px}
+
+/* suit-only grid cells, larger */
+.grid-cell--suitonly{min-width:var(--cell);min-height:var(--cell)}
+
+/* clickable score rows */
+.score-row--click{cursor:pointer}
+.score-row--click:hover{background:var(--surface-2)}
+.row-hint{display:inline-block;font-size:.7rem;color:var(--accent);font-weight:700;margin-left:4px}
+
+/* mobile contract screen: clear the top bar, keep all four roles + card on-screen */
+[data-device="mobile"] .contract-grid{inset:64px 4px 84px 4px;grid-template-columns:64px 1fr 64px}
+[data-device="mobile"] .role--west{min-width:0;width:64px}
+[data-device="mobile"] .role--east{min-width:0;width:64px}
+[data-device="mobile"] .role-badge{min-width:0;width:130px;padding:8px 10px;border-radius:11px}
+[data-device="mobile"] .role-seat{font-size:1rem}
+[data-device="mobile"] .role-name{font-size:.74rem}
+[data-device="mobile"] .role-note{font-size:.64rem}
+[data-device="mobile"] .fourcard{width:150px;height:150px}
+[data-device="mobile"] .contract-actions{bottom:12px;gap:8px;flex-wrap:wrap;padding:0 8px}
+[data-device="mobile"] .contract-actions .btn-primary{padding:10px 16px;font-size:.92rem;min-height:46px}
+</style>
+</head>
+<body>
+<div id="device-toggle">
+  <button id="dt-desktop" class="dt-on">Desktop</button>
+  <button id="dt-mobile">Mobile</button>
+</div>
+<div id="preview"><div id="app"></div></div>
+<script>
+// ============ BRIDGE DOMAIN ============
+const SEATS = ['North','East','South','West'];
+const STRAINS = ['C','D','H','S','NT'];
+const STRAIN_RANK = {C:0,D:1,H:2,S:3,NT:4};
+const STRAIN_SYMBOL = {C:'\u2663',D:'\u2666',H:'\u2665',S:'\u2660',NT:'NT'};
+const STRAIN_LABEL = {C:'Clubs',D:'Diamonds',H:'Hearts',S:'Spades',NT:'No Trump'};
+const RED = ['D','H'];
+const LEVELS = [1,2,3,4,5,6,7];
+
+const isRed = s => RED.includes(s);
+const bidRank = (l,s) => (l-1)*5 + STRAIN_RANK[s];
+const partnerOf = s => ({North:'South',South:'North',East:'West',West:'East'}[s]);
+const nextSeat = s => SEATS[(SEATS.indexOf(s)+1)%4];
+const pairOf = s => (s==='North'||s==='South') ? 'NS' : 'EW';
+const leftOf = s => SEATS[(SEATS.indexOf(s)+1)%4];
+
+function lastContractBid(bids){
+  for(let i=bids.length-1;i>=0;i--){
+    const c=bids[i].call;
+    if(c.kind==='bid') return {level:c.level,strain:c.strain,seat:bids[i].seat};
+  }
+  return null;
+}
+function currentDoubleState(bids){
+  let st='none';
+  for(const b of bids){
+    if(b.call.kind==='bid') st='none';
+    else if(b.call.kind==='double') st='doubled';
+    else if(b.call.kind==='redouble') st='redoubled';
+  }
+  return st;
+}
+function seatToBid(dealer,bids){
+  let seat=dealer;
+  for(let i=0;i<bids.length;i++) seat=nextSeat(seat);
+  return seat;
+}
+function isLegalCall(call,dealer,bids){
+  const turn=seatToBid(dealer,bids);
+  if(call.kind==='pass') return true;
+  if(call.kind==='bid'){
+    const last=lastContractBid(bids);
+    if(!last) return true;
+    return bidRank(call.level,call.strain) > bidRank(last.level,last.strain);
+  }
+  if(call.kind==='double'){
+    const last=lastContractBid(bids);
+    if(!last) return false;
+    if(pairOf(last.seat)===pairOf(turn)) return false;
+    return currentDoubleState(bids)==='none';
+  }
+  if(call.kind==='redouble'){
+    const last=lastContractBid(bids);
+    if(!last) return false;
+    if(pairOf(last.seat)!==pairOf(turn)) return false;
+    return currentDoubleState(bids)==='doubled';
+  }
+  return false;
+}
+function isAuctionComplete(bids){
+  if(bids.length<4) return false;
+  const last3=bids.slice(-3);
+  const allPass3=last3.every(b=>b.call.kind==='pass');
+  const hasBid=bids.some(b=>b.call.kind==='bid');
+  if(allPass3&&hasBid) return true;
+  if(bids.length===4&&bids.every(b=>b.call.kind==='pass')) return true;
+  return false;
+}
+function isPassedOut(bids){
+  return bids.length===4 && bids.every(b=>b.call.kind==='pass');
+}
+function deriveContract(dealer,bids){
+  const last=lastContractBid(bids);
+  if(!last) return null;
+  const winningPair=pairOf(last.seat);
+  let declarer=null, seat=dealer;
+  for(const b of bids){
+    if(b.call.kind==='bid' && b.call.strain===last.strain && pairOf(seat)===winningPair){
+      declarer=seat; break;
+    }
+    seat=nextSeat(seat);
+  }
+  return {level:last.level,strain:last.strain,declarer:declarer||last.seat,doubled:currentDoubleState(bids)};
+}
+
+// ============ SCORING ============
+function isVul(pair,vul){ if(vul==='Both')return true; if(vul==='None')return false; return vul===pair; }
+function scoreContract(contract,nsTricks,vul){
+  const dPair=pairOf(contract.declarer);
+  const dTricks = dPair==='NS' ? nsTricks : 13-nsTricks;
+  const vulnerable=isVul(dPair,vul);
+  const needed=contract.level+6;
+  const made=dTricks>=needed;
+  const {level,strain,doubled}=contract;
+  let score=0;
+  if(made){
+    let perTrick = (strain==='C'||strain==='D')?20:30;
+    let trickScore = level*perTrick;
+    if(strain==='NT') trickScore+=10;
+    if(doubled==='doubled') trickScore*=2;
+    if(doubled==='redoubled') trickScore*=4;
+    score+=trickScore;
+    score += trickScore>=100 ? (vulnerable?500:300) : 50;
+    if(level===6) score += vulnerable?750:500;
+    if(level===7) score += vulnerable?1500:1000;
+    if(doubled==='doubled') score+=50;
+    if(doubled==='redoubled') score+=100;
+    const over=dTricks-needed;
+    if(over>0){
+      if(doubled==='none') score+=over*perTrick;
+      else{ const per=vulnerable?200:100; const mult=doubled==='redoubled'?2:1; score+=over*per*mult; }
+    }
+  } else {
+    const under=needed-dTricks; let pen=0;
+    if(doubled==='none'){ pen=under*(vulnerable?100:50); }
+    else{
+      const mult=doubled==='redoubled'?2:1;
+      if(vulnerable){ pen=(200+(under-1)*300)*mult; }
+      else{ for(let i=1;i<=under;i++){ if(i===1)pen+=100; else if(i<=3)pen+=200; else pen+=300; } pen*=mult; }
+    }
+    score=-pen;
+  }
+  if(dPair==='NS') return score>=0?{scoreNS:score,scoreEW:0}:{scoreNS:0,scoreEW:-score};
+  return score>=0?{scoreNS:0,scoreEW:score}:{scoreNS:-score,scoreEW:0};
+}
+
+// ============ PALETTES ============
+const PALETTES={
+  'Felt Green':{swatches:['#1f4a3a','#2e6b52','#c0392b','#e9c46a'],vars:{'--bg':'#1c4435','--surface':'#225239','--surface-2':'#2c6347','--surface-3':'#367556','--ink':'#f4f7f4','--ink-dim':'#bcd4c6','--accent':'#e9c46a','--accent-ink':'#1c2a20','--danger':'#c0392b','--danger-ink':'#ffffff','--line':'#3a6e54','--focus':'#ffe08a','--red-suit':'#ff6b6b','--black-suit':'#f4f7f4'}},
+  'Navy Blue':{swatches:['#13243f','#1f3a63','#1fb8c4','#d4541f'],vars:{'--bg':'#0f1f38','--surface':'#162b4c','--surface-2':'#1f3a63','--surface-3':'#28497a','--ink':'#eef4fb','--ink-dim':'#a9c0dd','--accent':'#1fb8c4','--accent-ink':'#06222a','--danger':'#d4541f','--danger-ink':'#ffffff','--line':'#2c4d7d','--focus':'#5fe0ea','--red-suit':'#ff8a8a','--black-suit':'#eef4fb'}},
+  'High Contrast':{swatches:['#000000','#2a2a2a','#ffd400','#ffffff'],vars:{'--bg':'#000000','--surface':'#111111','--surface-2':'#1c1c1c','--surface-3':'#2a2a2a','--ink':'#ffffff','--ink-dim':'#d6d6d6','--accent':'#ffd400','--accent-ink':'#000000','--danger':'#ff3b30','--danger-ink':'#000000','--line':'#4a4a4a','--focus':'#ffd400','--red-suit':'#ff5b52','--black-suit':'#ffffff'}},
+  'Warm Parchment':{swatches:['#9e2b25','#2f6f8f','#e7dcc3','#f3ecdc'],vars:{'--bg':'#ece3cf','--surface':'#f3ecdc','--surface-2':'#e3d8bd','--surface-3':'#d6c7a3','--ink':'#2b2417','--ink-dim':'#6a5d44','--accent':'#9e2b25','--accent-ink':'#f3ecdc','--danger':'#9e2b25','--danger-ink':'#f3ecdc','--line':'#c9b78f','--focus':'#9e2b25','--red-suit':'#b3261e','--black-suit':'#2b2417'}}
+};
+const PALETTE_NAMES=Object.keys(PALETTES);
+
+// ============ STATE ============
+const DEALERS=['North','East','South','West'];
+const VULS=['None','NS','EW','Both','NS','EW','Both','None','EW','Both','None','NS','Both','None','NS','EW'];
+const dealerForBoard=n=>DEALERS[(n-1)%4];
+const vulForBoard=n=>VULS[(n-1)%16];
+function freshBoard(n){return{boardNumber:n,dealer:dealerForBoard(n),vulnerability:vulForBoard(n),bids:[],contract:null,nsTricks:0};}
+
+let S = {
+  screen:'newGame', trackVulnerability:true, calculateScore:true, history:[],
+  ...freshBoard(1),
+  // settings
+  palette:'Felt Green', gridStyle:'table', animations:true, sound:false, rotationVariant:'autoRotate', biddingLayout:'autoRotate',
+  // transient ui
+  settingsOpen:false, compactLevel:null, historyBoard:null,
+};
+
+function applyPalette(){
+  const vars=PALETTES[S.palette].vars;
+  for(const[k,v]of Object.entries(vars)) document.documentElement.style.setProperty(k,v);
+  document.body.classList.toggle('no-anim',!S.animations);
+}
+
+// ============ HELPERS ============
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; }
+function suitHTML(strain,size=24){
+  if(strain==='NT') return `<span style="font-size:${size*0.7}px;font-weight:800" aria-label="No Trump">NT</span>`;
+  const cls=isRed(strain)?'suit-red':'suit-black';
+  return `<span class="${cls}" style="font-size:${size}px;line-height:1" role="img" aria-label="${STRAIN_LABEL[strain]}">${STRAIN_SYMBOL[strain]}</span>`;
+}
+const SEAT_ANGLE={South:0,West:90,North:180,East:270};
+
+function speakCall(seat,call){
+  if(!S.sound||!window.speechSynthesis) return;
+  let t='';
+  if(call.kind==='pass') t=`${seat} passes`;
+  else if(call.kind==='double') t=`${seat} doubles`;
+  else if(call.kind==='redouble') t=`${seat} redoubles`;
+  else t=`${seat} bids ${call.level} ${STRAIN_LABEL[call.strain]}`;
+  const u=new SpeechSynthesisUtterance(t); u.rate=.95;
+  window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+}
+
+// ============ ACTIONS ============
+function makeCall(call){
+  const turn=seatToBid(S.dealer,S.bids);
+  speakCall(turn,call);
+  S.bids=[...S.bids,{seat:turn,call}];
+  S.compactLevel=null;
+  if(isAuctionComplete(S.bids)){
+    S.contract=isPassedOut(S.bids)?null:deriveContract(S.dealer,S.bids);
+    S.screen='contract';
+  }
+  render();
+}
+function undoCall(){ S.bids=S.bids.slice(0,-1); S.compactLevel=null; render(); }
+function startGame(){ S.screen='bidding'; S.history=[]; Object.assign(S,freshBoard(1)); render(); }
+function setTricks(v){ S.nsTricks=Math.max(0,Math.min(13,v)); render(); }
+function confirmScore(){
+  let scoreNS=0,scoreEW=0;
+  if(S.contract&&S.calculateScore){ const r=scoreContract(S.contract,S.nsTricks,S.vulnerability); scoreNS=r.scoreNS; scoreEW=r.scoreEW; }
+  S.history=[...S.history,{board:S.boardNumber,contract:S.contract,nsTricks:S.nsTricks,scoreNS,scoreEW,bids:S.bids.slice(),dealer:S.dealer}];
+  S.screen='score'; render();
+}
+function nextHand(){ const n=S.boardNumber+1; S.screen='bidding'; Object.assign(S,freshBoard(n)); render(); }
+function newGame(){ S.screen='newGame'; S.history=[]; Object.assign(S,freshBoard(1)); render(); }
+function go(screen){ S.screen=screen; render(); }
+
+// ============ COMPONENTS ============
+function topBar(centerLabel){
+  const nsVul=['NS','Both'].includes(S.vulnerability);
+  const ewVul=['EW','Both'].includes(S.vulnerability);
+  const nsTotal=S.history.reduce((a,b)=>a+b.scoreNS,0);
+  const ewTotal=S.history.reduce((a,b)=>a+b.scoreEW,0);
+  let h=`<div class="topbar">`;
+  if(S.trackVulnerability){
+    h+=`<span class="pill ${nsVul?'pill--vul':'pill--safe'}">N/S ${nsVul?'Vul':'Safe'}</span>`;
+    h+=`<span class="pill ${ewVul?'pill--vul':'pill--safe'}">E/W ${ewVul?'Vul':'Safe'}</span>`;
+  }
+  if(centerLabel) h+=`<span class="pill pill--accent pill--turn">${centerLabel}</span>`;
+  h+=`<span class="spacer"></span>`;
+  if(S.calculateScore){
+    h+=`<span class="pill pill--score">N/S: ${nsTotal}</span>`;
+    h+=`<span class="pill pill--score">E/W: ${ewTotal}</span>`;
+  }
+  h+=`<button class="icon-btn" data-act="settings" aria-label="Settings">&#9881;</button>`;
+  h+=`</div>`;
+  return h;
+}
+
+function callLabel(call){
+  if(call.kind==='pass') return 'Pass';
+  if(call.kind==='double') return 'X';
+  if(call.kind==='redouble') return 'XX';
+  return `<span class="call-inline">${call.level}${suitHTML(call.strain,16)}</span>`;
+}
+
+function biddingGridHTML(){
+  const last=lastContractBid(S.bids);
+  const legal=c=>isLegalCall(c,S.dealer,S.bids);
+  let inner='';
+  if(S.gridStyle==='table'){
+    inner+=`<div class="grid-table">`;
+    for(const lvl of LEVELS){
+      inner+=`<div class="grid-row"><span class="row-label">${lvl}</span>`;
+      for(const s of STRAINS){
+        const ok=legal({kind:'bid',level:lvl,strain:s});
+        const sel=last&&last.level===lvl&&last.strain===s;
+        inner+=`<button class="call-btn grid-cell grid-cell--suitonly ${sel?'call-btn--selected':''}" ${ok?'':'disabled'} data-bid="${lvl}${s}" aria-label="${lvl} ${STRAIN_LABEL[s]}">${suitHTML(s,30)}</button>`;
+      }
+      inner+=`</div>`;
+    }
+    inner+=`</div>`;
+  } else {
+    inner+=`<div class="grid-compact"><div class="compact-levels">`;
+    for(const lvl of LEVELS){
+      const any=STRAINS.some(s=>legal({kind:'bid',level:lvl,strain:s}));
+      const sel=S.compactLevel===lvl;
+      inner+=`<button class="call-btn grid-cell ${sel?'call-btn--selected':''}" ${any?'':'disabled'} data-clevel="${lvl}">${lvl}</button>`;
+    }
+    inner+=`</div><div class="compact-hint">${S.compactLevel?`Level ${S.compactLevel} \u2014 pick a suit`:'Pick a level'}</div><div class="compact-strains">`;
+    for(const s of STRAINS){
+      const ok=S.compactLevel?legal({kind:'bid',level:S.compactLevel,strain:s}):false;
+      inner+=`<button class="call-btn grid-cell" ${ok?'':'disabled'} data-cstrain="${s}" aria-label="${STRAIN_LABEL[s]}">${suitHTML(s,22)}</button>`;
+    }
+    inner+=`</div></div>`;
+  }
+  const dOk=legal({kind:'double'}), rOk=legal({kind:'redouble'});
+  inner+=`<div class="special-row">
+    <button class="call-btn call-btn--special special-pass" data-special="pass">Pass</button>
+    <button class="call-btn call-btn--special" ${dOk?'':'disabled'} data-special="double" aria-label="Double">X</button>
+    <button class="call-btn call-btn--special" ${rOk?'':'disabled'} data-special="redouble" aria-label="Redouble">XX</button>
+  </div>`;
+  return `<div class="grid-wrap">${inner}</div>`;
+}
+
+function rotateWrap(facing,inner,enabled=true){
+  const angle=enabled?SEAT_ANGLE[facing]:0;
+  const trans=S.animations?'transform .55s cubic-bezier(.4,0,.2,1)':'none';
+  // outer span has zero footprint; inner is absolutely centred and rotated,
+  // so a wide pre-rotation strip doesn't push the layout off-screen when sideways.
+  return `<span style="position:relative;display:inline-block;width:0;height:0"><span style="position:absolute;left:0;top:0;transform:translate(-50%,-50%) rotate(${angle}deg);transition:${trans};transform-origin:center center;display:inline-flex;white-space:nowrap">${inner}</span></span>`;
+}
+function seatBadge(seat,active){
+  return `<div class="seat-badge ${active?'seat-badge--active':''}">${seat}${active?'<span class="seat-cue">to bid</span>':''}</div>`;
+}
+
+function seatCard(seat,turn){
+  const side = (seat==='East'||seat==='West');
+  const active=turn===seat;
+  // mobile: cap visible bids so rotated side strips fit on a phone; all seats keep the same card size
+  let limit;
+  if(S.deviceMobile){ limit = side ? 2 : 3; }
+  else { limit = side ? 4 : 6; }
+  const all=S.bids.filter(b=>b.seat===seat);
+  const mine=all.slice(-limit);
+  const more = all.length>limit ? all.length-limit : 0;
+  const lastBidder = S.bids.length ? S.bids[S.bids.length-1].seat : null;
+  const isLastBidder = lastBidder===seat;
+  const canUndo=S.bids.length>0;
+  let cardsHTML='';
+  if(mine.length===0){
+    cardsHTML=`<div class="bc-empty">\u2014</div>`;
+  } else {
+    cardsHTML=(more?`<span class="bc-more">+${more}</span>`:'')+mine.map((b,i)=>{
+      const isNewest = isLastBidder && i===mine.length-1;
+      return `<span class="bc-card ${isNewest?'bc-card--newest':''}">${bigCallLabel(b.call)}</span>`;
+    }).join('');
+  }
+  // horizontal strip: name + arrow fixed at the player's left end, cards grow rightward (toward table centre)
+  return `<div class="bid-seat ${active?'bid-seat--active':''}">
+      <div class="bc-head">
+        <button class="bc-back ${isLastBidder?'bc-back--live':''}" ${canUndo?'':'disabled'} data-act="undo" aria-label="Undo last bid (${seat})">&#8634;</button>
+        <div class="bc-name">${seat}${active?'<span class="bc-turn">to bid</span>':''}</div>
+      </div>
+      <div class="bc-cards">${cardsHTML}</div>
+    </div>`;
+}
+
+// larger bid card label: level on top, suit below (like the physical cards)
+function bigCallLabel(call){
+  if(call.kind==='pass') return `<span class="bc-word">Pass</span>`;
+  if(call.kind==='double') return `<span class="bc-word">X</span>`;
+  if(call.kind==='redouble') return `<span class="bc-word">XX</span>`;
+  return `<span class="bc-bid"><span class="bc-lvl">${call.level}</span>${suitHTML(call.strain,24)}</span>`;
+}
+
+function biddingScreen(){
+  const turn=seatToBid(S.dealer,S.bids);
+  const label=S.bids.length===0?`${turn} to open`:`${turn}'s turn`;
+  let body;
+  if(S.biddingLayout==='fourGrids'){
+    body=fourGridsBody(turn);
+  } else {
+    const gridBlock=`<div style="display:flex;flex-direction:column;align-items:center;gap:10px">${biddingGridHTML()}</div>`;
+    body=`<div class="auto-layout">
+      <div class="auto-center">${rotateWrap(turn,gridBlock)}</div>
+      <div class="seat-pos seat-pos--north">${rotateWrap('North',seatCard('North',turn))}</div>
+      <div class="seat-pos seat-pos--south">${rotateWrap('South',seatCard('South',turn))}</div>
+      <div class="seat-pos seat-pos--west">${rotateWrap('West',seatCard('West',turn))}</div>
+      <div class="seat-pos seat-pos--east">${rotateWrap('East',seatCard('East',turn))}</div>
+    </div>`;
+  }
+  return `<div class="app-shell">${topBar(label)}<div class="screen-body">${body}</div></div>`;
+}
+
+// FOUR GRIDS: a compact grid permanently at each edge, facing its player.
+// Only the active player's grid is enabled; the others are shown dimmed.
+// Each grid has a strip of that seat's bid cards above it; the centre shows a
+// dual-readable auction summary (so both long sides can follow without rotating).
+function fourGridsBody(turn){
+  return `<div class="auto-layout fg-layout" id="fg-layout">
+    <div class="fg-seat fg-seat--north"><div class="fg-seat-inner">${fgSeatBlock('North',turn)}</div></div>
+    <div class="fg-seat fg-seat--south"><div class="fg-seat-inner">${fgSeatBlock('South',turn)}</div></div>
+    <div class="fg-seat fg-seat--west"><div class="fg-seat-inner">${fgSeatBlock('West',turn)}</div></div>
+    <div class="fg-seat fg-seat--east"><div class="fg-seat-inner">${fgSeatBlock('East',turn)}</div></div>
+  </div>`;
+}
+
+// a seat's bid-card strip stacked above its input grid
+function fgSeatBlock(seat,turn){
+  const mine=S.bids.filter(b=>b.seat===seat);
+  const shown=mine.slice(-5);
+  const more=mine.length>5?mine.length-5:0;
+  let cards;
+  if(shown.length===0){ cards=`<span class="fgb-empty">no bids yet</span>`; }
+  else { cards=(more?`<span class="fgb-more">+${more}</span>`:'')+shown.map(b=>`<span class="fgb-card">${fgBidLabel(b.call)}</span>`).join(''); }
+  return `<div class="fg-block"><div class="fg-bids">${cards}</div>${miniGridFor(seat,turn)}</div>`;
+}
+function fgBidLabel(call){
+  if(call.kind==='pass') return 'P';
+  if(call.kind==='double') return 'X';
+  if(call.kind==='redouble') return 'XX';
+  return `${call.level}${suitHTML(call.strain,22)}`;
+}
+
+// A compact grid for one seat. Enabled only when it's that seat's turn.
+function miniGridFor(seat,turn){
+  const active=seat===turn;
+  const last=lastContractBid(S.bids);
+  const legal=c=>isLegalCall(c,S.dealer,S.bids);
+  const canUndo=S.bids.length>0;
+  // compact: a level row, suit row, special row
+  let lv='';
+  for(const lvl of LEVELS){
+    const any=STRAINS.some(s=>legal({kind:'bid',level:lvl,strain:s}));
+    const sel=active&&S.compactLevel===lvl;
+    lv+=`<button class="call-btn fg-cell ${sel?'call-btn--selected':''}" ${active&&any?'':'disabled'} ${active?`data-clevel="${lvl}"`:''}>${lvl}</button>`;
+  }
+  let su='';
+  for(const s of STRAINS){
+    const ok=active&&S.compactLevel?legal({kind:'bid',level:S.compactLevel,strain:s}):false;
+    su+=`<button class="call-btn fg-cell" ${ok?'':'disabled'} ${active?`data-cstrain="${s}"`:''} aria-label="${STRAIN_LABEL[s]}">${suitHTML(s,18)}</button>`;
+  }
+  const dOk=active&&legal({kind:'double'}), rOk=active&&legal({kind:'redouble'});
+  const spec=`<div class="fg-spec">
+    <button class="call-btn call-btn--special" ${active?'':'disabled'} ${active?'data-special="pass"':''}>Pass</button>
+    <button class="call-btn call-btn--special" ${dOk?'':'disabled'} ${active?'data-special="double"':''}>X</button>
+    <button class="call-btn call-btn--special" ${rOk?'':'disabled'} ${active?'data-special="redouble"':''}>XX</button>
+  </div>`;
+  const backBtn = active ? `<button class="fg-back" ${canUndo?'':'disabled'} data-act="undo" aria-label="Undo last bid">&#8634; Back</button>` : '';
+  return `<div class="fg-grid ${active?'fg-grid--active':''}">
+    <div class="fg-name">${seat}${active?'<span class="fg-turn">your turn</span>':''}</div>
+    <div class="fg-levels">${lv}</div>
+    <div class="fg-suits">${su}</div>
+    ${spec}
+    ${backBtn}
+  </div>`;
+}
+
+function newGameScreen(){
+  return `<div class="app-shell">${topBar('Game')}
+    <div class="center-col">
+      <h1 class="h1" style="font-size:3rem;margin:0">New Game</h1>
+      <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:24px">
+        <div class="row-flex">
+          <div><div style="font-weight:800;font-size:1.25rem">Vulnerability</div><div style="color:var(--ink-dim);font-style:italic">Show and track vulnerability</div></div>
+          <button class="toggle" data-toggle="trackVulnerability" data-on="${S.trackVulnerability}" role="switch" aria-checked="${S.trackVulnerability}" aria-label="Vulnerability"><span class="knob"></span></button>
+        </div>
+        <div class="row-flex">
+          <div><div style="font-weight:800;font-size:1.25rem">Calculate score</div><div style="color:var(--ink-dim);font-style:italic">Show score after each hand</div></div>
+          <button class="toggle" data-toggle="calculateScore" data-on="${S.calculateScore}" role="switch" aria-checked="${S.calculateScore}" aria-label="Calculate score"><span class="knob"></span></button>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn-primary" data-act="start">Start Game</button>
+    </div></div>`;
+}
+
+function contractScreen(){
+  const c=S.contract;
+  if(!c){
+    return `<div class="app-shell">${topBar('Game')}
+      <div class="center-col">
+        <h1 class="h1" style="font-size:2.4rem">Passed Out</h1>
+        <p style="color:var(--ink-dim)">No contract was reached this board.</p>
+        <div style="display:flex;gap:12px">
+          <button class="btn-primary" data-act="toBidding">Back to Bidding</button>
+          <button class="btn-primary btn-primary--filled" data-act="nextHand">Next Hand</button>
+        </div>
+      </div></div>`;
+  }
+  const declarer=c.declarer, dummy=partnerOf(declarer), leader=leftOf(declarer);
+  const roleFor=seat=>{
+    if(seat===declarer) return {role:'Declarer'};
+    if(seat===dummy) return {role:'Dummy Hand'};
+    if(seat===leader) return {role:'Defender',note:'Opening Lead'};
+    return {role:'Defender'};
+  };
+  const onSide=seat=>seat===declarer||seat===dummy;
+  const badge=seat=>{
+    const r=roleFor(seat);
+    return `<div class="role-badge ${onSide(seat)?'role-badge--decl':''}"><div class="role-seat">${seat}</div><div class="role-name">${r.role}</div>${r.note?`<div class="role-note">${r.note}</div>`:''}</div>`;
+  };
+  const dbl=c.doubled==='doubled'?' X':c.doubled==='redoubled'?' XX':'';
+  const contractInner=`${c.level}${suitHTML(c.strain,30)}${dbl?`<span class="fc-dbl">${dbl}</span>`:''}`;
+  const fourSidedCard=`<div class="fourcard">
+      <div class="fc-edge fc-edge--top">${contractInner}</div>
+      <div class="fc-edge fc-edge--bottom">${contractInner}</div>
+      <div class="fc-edge fc-edge--left">${contractInner}</div>
+      <div class="fc-edge fc-edge--right">${contractInner}</div>
+      <div class="fc-centre"><div class="fc-by">by</div><div class="fc-by-seat">${declarer}</div></div>
+    </div>`;
+  return `<div class="app-shell">${topBar('Game')}
+    <div class="screen-body">
+      <div class="contract-grid">
+        <div class="role role--north">${rotateWrap('North',badge('North'))}</div>
+        <div class="role role--west">${rotateWrap('West',badge('West'))}</div>
+        <div class="role role--center">${fourSidedCard}</div>
+        <div class="role role--east">${rotateWrap('East',badge('East'))}</div>
+        <div class="role role--south">${badge('South')}</div>
+      </div>
+      <div class="contract-actions">
+        <button class="icon-btn" data-act="toBidding" aria-label="Back">&#8634;</button>
+        <button class="btn-primary" data-act="liveHistory">Bid History</button>
+        <button class="btn-primary btn-primary--filled" data-act="${S.calculateScore?'toTricks':'nextHand'}">${S.calculateScore?'Add Score':'Next Hand'}</button>
+      </div>
+    </div></div>`;
+}
+
+function tricksScreen(){
+  const c=S.contract;
+  const counter=(flip)=>`<div class="trick-counter ${flip?'trick-counter--flip':''}">
+      <button class="trick-btn" data-act="trickMinus" aria-label="One fewer trick">&minus;</button>
+      <div class="trick-num" aria-live="polite">${S.nsTricks}</div>
+      <button class="trick-btn" data-act="trickPlus" aria-label="One more trick">+</button>
+    </div>`;
+  const prompt=(flip)=>`<div class="trick-prompt ${flip?'trick-prompt--flip':''}">
+      <div class="trick-q">Tricks won by N/S</div>
+      <div class="trick-contract">Contract: <strong>${c.level}${suitHTML(c.strain,18)} by ${c.declarer}</strong></div>
+    </div>`;
+  return `<div class="app-shell">${topBar('Game')}
+    <div class="trick-split">
+      <div class="trick-zone trick-zone--top">
+        ${prompt(true)}
+        ${counter(true)}
+        <button class="btn-primary btn-primary--filled" data-act="confirmScore">Add Score</button>
+      </div>
+      <div class="trick-seam"></div>
+      <div class="trick-zone">
+        ${prompt(false)}
+        ${counter(false)}
+        <div class="trick-actions"><button class="btn-primary" data-act="toContract">Back</button><button class="btn-primary btn-primary--filled" data-act="confirmScore">Add Score</button></div>
+      </div>
+    </div></div>`;
+}
+
+function resultText(b){
+  if(!b.contract) return 'Passed out';
+  const c=b.contract, dPair=pairOf(c.declarer);
+  const dT=dPair==='NS'?b.nsTricks:13-b.nsTricks;
+  const diff=dT-(c.level+6);
+  if(diff===0) return 'Made';
+  if(diff>0) return `Made +${diff}`;
+  return `Down ${-diff}`;
+}
+function contractCell(c){
+  if(!c) return '&mdash;';
+  const dbl=c.doubled==='doubled'?' X':c.doubled==='redoubled'?' XX':'';
+  return `<span style="display:inline-flex;align-items:center;gap:4px">${c.declarer[0]}: ${c.level}${suitHTML(c.strain,16)}${dbl}</span>`;
+}
+function scoreScreen(){
+  let running=0; const rows=S.history.map(b=>{running+=b.scoreNS-b.scoreEW; return{b,running};});
+  const nsAhead=running>=0;
+  // a self-contained score panel (title + table + actions), used twice in the split
+  const panel=()=>{
+    let body=`<table class="score-table"><thead><tr><th>Board</th><th>Contract</th><th>Result</th><th>N/S</th><th>E/W</th><th>Total</th></tr></thead><tbody>`;
+    for(const{b,running}of rows){
+      const hasBids=b.bids&&b.bids.length;
+      body+=`<tr class="${hasBids?'score-row--click':''}" ${hasBids?`data-history="${b.board}"`:''}><td>${b.board}${hasBids?' <span class="row-hint">bids</span>':''}</td><td>${contractCell(b.contract)}</td><td>${resultText(b)}</td><td>${b.scoreNS?'+'+b.scoreNS:''}</td><td>${b.scoreEW?'+'+b.scoreEW:''}</td><td>${running>=0?'NS +'+running:'EW +'+(-running)}</td></tr>`;
+    }
+    body+=`</tbody></table>`;
+    return `<div class="score-panel">
+      <h1 class="h1 score-title">${nsAhead?'N/S':'E/W'} Win</h1>
+      ${body}
+      <div class="score-actions">
+        <button class="icon-btn" data-act="toContract" aria-label="Back">&#8634;</button>
+        <button class="btn-primary" data-act="nextHand">Next Hand</button>
+        <button class="btn-primary btn-primary--filled" data-act="newGame">New Game</button>
+      </div>
+    </div>`;
+  };
+  return `<div class="app-shell">${topBar('Game')}
+    <div class="score-split">
+      <div class="score-zone score-zone--top">${panel()}</div>
+      <div class="score-seam"></div>
+      <div class="score-zone">${panel()}</div>
+    </div></div>`;
+}
+
+// Build a 4-column auction table (returns HTML string)
+function auctionTableHTML(bids,dealer){
+  const startIdx=SEATS.indexOf(dealer);
+  const cols=[0,1,2,3].map(i=>SEATS[(startIdx+i)%4]);
+  let rows=[],row=[];
+  bids.forEach((b,i)=>{ row.push(b); if(row.length===4){rows.push(row);row=[];} if(i===bids.length-1&&row.length){while(row.length<4)row.push(null);rows.push(row);} });
+  let tbl=`<table class="bh-table"><thead><tr>${cols.map(c=>`<th>${c}${c===dealer?'<em>dealer</em>':''}</th>`).join('')}</tr></thead><tbody>`;
+  if(rows.length===0) tbl+=`<tr><td colspan="4" class="bh-empty">No bids yet</td></tr>`;
+  for(const r of rows){ tbl+=`<tr>${r.map(b=>`<td>${b?callLabel(b.call):''}</td>`).join('')}</tr>`; }
+  tbl+=`</tbody></table>`;
+  return tbl;
+}
+
+// Dual-flip bid-history popup: two mirrored copies, each scrolls independently.
+function historyModal(){
+  let bids,dealer,title,sub;
+  if(S.historyBoard==='live'){
+    bids=S.bids; dealer=S.dealer;
+    const c=S.contract;
+    title='Bidding History';
+    sub = c ? `Contract: ${c.level}${suitHTML(c.strain,16)} by ${c.declarer}${c.doubled==='doubled'?' X':c.doubled==='redoubled'?' XX':''}` : '';
+  } else {
+    const rec=S.history.find(b=>b.board===S.historyBoard);
+    if(!rec) return '';
+    bids=rec.bids; dealer=rec.dealer;
+    const c=rec.contract;
+    title=`Board ${rec.board} — Bidding`;
+    sub = c ? `${c.level}${suitHTML(c.strain,16)} by ${c.declarer} · ${resultText(rec)}` : 'Passed out';
+  }
+  const tbl=auctionTableHTML(bids,dealer);
+  const panel=`<div class="bh-panel"><div class="bh-scroll">${tbl}</div></div>`;
+  return `<div class="bh-overlay" data-act="closeHistoryBg">
+    <div class="bh-modal" data-stop>
+      <div class="bh-zone bh-zone--top">${panel}</div>
+      <div class="bh-bar">
+        <span class="bh-title">${title}</span>
+        ${sub?`<span class="bh-sub">${sub}</span>`:''}
+        <span class="bh-spacer"></span>
+        <button class="icon-btn" data-act="closeHistory" aria-label="Close">&times;</button>
+      </div>
+      <div class="bh-zone">${panel}</div>
+    </div>
+  </div>`;
+}
+
+function settingsPanel(){
+  let pal='';
+  for(const name of PALETTE_NAMES){
+    const p=PALETTES[name];
+    pal+=`<button class="palette-card ${S.palette===name?'palette-card--active':''}" data-pal="${name}"><div class="palette-swatches">${p.swatches.map(c=>`<span style="background:${c}"></span>`).join('')}</div><span class="palette-name">${name}</span></button>`;
+  }
+  return `<div class="settings-overlay" data-act="closeSettingsBg"><div class="settings-sheet" data-stop>
+    <div class="settings-head"><h2 class="h1" style="margin:0;font-size:2rem">Settings</h2><button class="icon-btn" data-act="closeSettings" aria-label="Close settings">&times;</button></div>
+    <section class="settings-card">
+      <h3>Appearance</h3>
+      <p class="settings-label">Colour Palettes</p><p class="settings-sub">Choose your colours for the app</p>
+      <div class="palette-row">${pal}</div>
+      <p class="settings-label">Bidding Grid</p><p class="settings-sub">Choose how bidding is shown${S.deviceMobile?' &middot; <span style="color:var(--accent)">only Compact fits on a phone</span>':''}</p>
+      <div class="grid-choice-row">
+        <button class="grid-choice ${S.biddingLayout!=='fourGrids'&&S.gridStyle==='table'?'grid-choice--active':''}" data-gridpick="table" ${S.deviceMobile?'disabled':''}><span class="grid-choice-mini grid-choice-mini--table"></span>Full grid${S.deviceMobile?'<span class="gc-reason">Too large for phone</span>':''}</button>
+        <button class="grid-choice ${S.biddingLayout!=='fourGrids'&&S.gridStyle==='compact'?'grid-choice--active':''}" data-gridpick="compact"><span class="grid-choice-mini grid-choice-mini--compact"></span>Compact</button>
+        <button class="grid-choice ${S.biddingLayout==='fourGrids'?'grid-choice--active':''}" data-gridpick="four" ${S.deviceMobile?'disabled':''}><span class="grid-choice-mini grid-choice-mini--four"></span>Four grids${S.deviceMobile?'<span class="gc-reason">Needs a tablet</span>':''}</button>
+      </div>
+      <div class="toggle-row"><div><div style="font-weight:800;font-size:1.15rem">Animations</div><div style="color:var(--ink-dim);font-style:italic">Grid rotation and transitions</div></div>
+        <button class="toggle" data-toggle="animations" data-on="${S.animations}" role="switch" aria-checked="${S.animations}" aria-label="Animations"><span class="knob"></span></button></div>
+    </section>
+    <section class="settings-card">
+      <h3>Audio</h3>
+      <div class="toggle-row"><div><div style="font-weight:800;font-size:1.15rem">Sound Effects</div><div style="color:var(--ink-dim);font-style:italic">Spoken bid announcements</div></div>
+        <button class="toggle" data-toggle="sound" data-on="${S.sound}" role="switch" aria-checked="${S.sound}" aria-label="Sound Effects"><span class="knob"></span></button></div>
+    </section>
+  </div></div>`;
+}
+
+// ============ RENDER ============
+function render(){
+  applyPalette();
+  const app=document.getElementById('app');
+  let html='';
+  if(S.screen==='newGame') html=newGameScreen();
+  else if(S.screen==='bidding') html=biddingScreen();
+  else if(S.screen==='contract') html=contractScreen();
+  else if(S.screen==='tricks') html=tricksScreen();
+  else if(S.screen==='score') html=scoreScreen();
+  if(S.settingsOpen) html+=settingsPanel();
+  if(S.historyBoard!=null) html+=historyModal();
+  app.innerHTML=html;
+  // after paint, fit the four-grids cluster to the available space
+  if(S.screen==='bidding' && S.biddingLayout==='fourGrids'){
+    requestAnimationFrame(fitFourGrids);
+  }
+}
+
+// Measure the edge blocks at scale 1 and shrink the cluster uniformly so the two
+// vertical (N/S) blocks fit the height and the two horizontal-on-screen (E/W) blocks
+// fit the width, with a small margin. Keeps every grid fully on-screen at any size.
+function fitFourGrids(){
+  const layout=document.getElementById('fg-layout');
+  if(!layout) return;
+  layout.style.setProperty('--fg-scale','1');
+  const avH=layout.clientHeight, avW=layout.clientWidth;
+  if(!avH||!avW) return;
+  const inners=layout.querySelectorAll('.fg-seat-inner');
+  let blockH=0, blockW=0;
+  inners.forEach(n=>{
+    if(n.offsetHeight>blockH) blockH=n.offsetHeight;
+    if(n.offsetWidth>blockW) blockW=n.offsetWidth;
+  });
+  const margin=20;
+  // N/S stacked vertically: their HEIGHT consumes vertical space (two of them)
+  // E/W rotated 90deg: their HEIGHT consumes horizontal space (two of them)
+  // E/W rotated: their WIDTH consumes vertical space (must fit height alongside N/S)
+  // N/S: their WIDTH consumes horizontal space (must fit width)
+  const vScale=(avH-margin)/(blockH*2);      // N over S
+  const hScale=(avW-margin)/(blockH*2);      // W beside E
+  const ewVfit=(avH-margin)/blockW;          // rotated E/W height (=width) within view height
+  const nsHfit=(avW-margin)/blockW;          // N/S width within view width
+  const scale=Math.min(1, vScale, hScale, ewVfit, nsHfit);
+  layout.style.setProperty('--fg-scale', scale.toFixed(3));
+}
+
+// ============ EVENT DELEGATION ============
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act],[data-bid],[data-clevel],[data-cstrain],[data-special],[data-toggle],[data-pal],[data-gridpick],[data-rot],[data-history]');
+  if(!t) return;
+
+  if(t.dataset.bid){ const m=t.dataset.bid.match(/^(\d)(.+)$/); makeCall({kind:'bid',level:+m[1],strain:m[2]}); return; }
+  if(t.dataset.clevel){ S.compactLevel=+t.dataset.clevel; render(); return; }
+  if(t.dataset.cstrain){ if(S.compactLevel){ const c={kind:'bid',level:S.compactLevel,strain:t.dataset.cstrain}; if(isLegalCall(c,S.dealer,S.bids)) makeCall(c); } return; }
+  if(t.dataset.special){ makeCall({kind:t.dataset.special}); return; }
+  if(t.dataset.toggle){ S[t.dataset.toggle]=!S[t.dataset.toggle]; render(); return; }
+  if(t.dataset.pal){ S.palette=t.dataset.pal; render(); return; }
+  if(t.dataset.gridpick){
+    if(t.dataset.gridpick==='four'){ S.biddingLayout='fourGrids'; }
+    else { S.biddingLayout='autoRotate'; S.gridStyle=t.dataset.gridpick; }
+    S.compactLevel=null; render(); return;
+  }
+  if(t.dataset.rot){ S.rotationVariant=t.dataset.rot; render(); return; }
+  if(t.dataset.history){ S.historyBoard=+t.dataset.history; render(); return; }
+
+  switch(t.dataset.act){
+    case 'settings': S.settingsOpen=true; render(); break;
+    case 'closeSettings': S.settingsOpen=false; render(); break;
+    case 'closeSettingsBg': if(e.target===t){ S.settingsOpen=false; render(); } break;
+    case 'closeHistory': S.historyBoard=null; render(); break;
+    case 'closeHistoryBg': if(e.target===t){ S.historyBoard=null; render(); } break;
+    case 'start': startGame(); break;
+    case 'undo': undoCall(); break;
+    case 'toBidding': go('bidding'); break;
+    case 'liveHistory': S.historyBoard='live'; render(); break;
+    case 'toContract': go('contract'); break;
+    case 'toTricks': go('tricks'); break;
+    case 'trickPlus': setTricks(S.nsTricks+1); break;
+    case 'trickMinus': setTricks(S.nsTricks-1); break;
+    case 'confirmScore': confirmScore(); break;
+    case 'nextHand': nextHand(); break;
+    case 'newGame': newGame(); break;
+  }
+});
+
+// prevent settings background click handler from firing on inner clicks
+document.addEventListener('click',e=>{ if(e.target.closest('[data-stop]')&&!e.target.closest('[data-act]')) e.stopPropagation(); },true);
+
+// device preview toggle
+(function(){
+  const prev=document.getElementById('preview');
+  const dD=document.getElementById('dt-desktop'), dM=document.getElementById('dt-mobile');
+  function set(mobile){
+    prev.classList.toggle('preview--mobile',mobile);
+    prev.setAttribute('data-device',mobile?'mobile':'desktop');
+    dM.classList.toggle('dt-on',mobile); dD.classList.toggle('dt-on',!mobile);
+    S.deviceMobile=mobile;
+    if(mobile && S.biddingLayout==='fourGrids'){ S.biddingLayout='autoRotate'; S.gridStyle='compact'; }
+    if(mobile && S.gridStyle==='table'){ S.gridStyle='compact'; }
+    render();
+  }
+  dD.addEventListener('click',()=>set(false));
+  dM.addEventListener('click',()=>set(true));
+  set(false);
+})();
+
+// init
+if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) S.animations=false;
+// keep the four-grids cluster fitted when the viewport changes
+let _fgResizeTimer=null;
+window.addEventListener('resize',()=>{
+  if(S.screen==='bidding' && S.biddingLayout==='fourGrids'){
+    clearTimeout(_fgResizeTimer);
+    _fgResizeTimer=setTimeout(fitFourGrids,80);
+  }
+});
+// re-fit once web fonts settle (they change block sizes after first paint)
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{ if(S.screen==='bidding' && S.biddingLayout==='fourGrids') fitFourGrids(); });
+}
+render();
+
+</script>
+</body>
+</html>

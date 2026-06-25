@@ -1,0 +1,23 @@
+{
+  "name": "bridge-table-companion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline-first, table-centre Bridge bidding and scoring aid.",
+  "workspaces": [
+    "apps/*",
+    "e2e"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @btc/web",
+    "build": "npm run build -w @btc/web",
+    "preview": "npm run preview -w @btc/web",
+    "test": "npm run test -w @btc/web",
+    "test:coverage": "npm run test:coverage -w @btc/web",
+    "lint": "npm run lint -w @btc/web",
+    "typecheck": "npm run typecheck -w @btc/web",
+    "e2e": "npm run test -w @btc/e2e"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,62 @@
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+
+// Offline-first single-device app. The PWA service worker caches the app shell so
+// the game loads and plays with no network (ARCHITECTURE.md §12).
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg'],
+      manifest: {
+        name: 'Bridge Table Companion',
+        short_name: 'Bridge',
+        description: 'Offline table-centre Bridge bidding and scoring aid.',
+        theme_color: '#1c4435',
+        background_color: '#0d0d0f',
+        display: 'fullscreen',
+        orientation: 'any',
+        icons: [
+          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+      },
+    }),
+  ],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      // The gate covers the pure, unit-tested layer (engine + state). React glue
+      // (GameContext) and the IndexedDB repository are exercised by E2E instead.
+      include: ['src/domain/**', 'src/state/**'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/**/fixtures/**',
+        'src/**/types.ts',
+        'src/state/GameContext.tsx',
+        'src/state/repository.ts',
+      ],
+      thresholds: {
+        lines: 95,
+        functions: 100,
+        branches: 88,
+        statements: 95,
+        'src/domain/**': {
+          lines: 96,
+          functions: 100,
+          branches: 88,
+          statements: 96,
+        },
+      },
+    },
+  },
+});

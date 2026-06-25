@@ -1,0 +1,56 @@
+{
+  "app": "bridge-table-companion",
+  "schemaVersion": 1,
+  "exportedAt": "2026-06-24T00:00:00.000Z",
+  "game": {
+    "schemaVersion": 1,
+    "screen": "score",
+    "trackVulnerability": true,
+    "calculateScore": true,
+    "settings": {
+      "palette": "Felt Green",
+      "gridStyle": "table",
+      "biddingLayout": "autoRotate",
+      "animations": true,
+      "sound": false
+    },
+    "board": {
+      "boardNumber": 3,
+      "dealer": "South",
+      "vulnerability": "EW",
+      "bids": [],
+      "contract": null,
+      "nsTricks": 0
+    },
+    "history": [
+      {
+        "board": 1,
+        "dealer": "North",
+        "contract": { "level": 3, "strain": "NT", "declarer": "North", "doubled": "none" },
+        "nsTricks": 9,
+        "scoreNS": 400,
+        "scoreEW": 0,
+        "bids": [
+          { "seat": "North", "call": { "kind": "bid", "level": 3, "strain": "NT" } },
+          { "seat": "East", "call": { "kind": "pass" } },
+          { "seat": "South", "call": { "kind": "pass" } },
+          { "seat": "West", "call": { "kind": "pass" } }
+        ]
+      },
+      {
+        "board": 2,
+        "dealer": "East",
+        "contract": null,
+        "nsTricks": 0,
+        "scoreNS": 0,
+        "scoreEW": 0,
+        "bids": [
+          { "seat": "East", "call": { "kind": "pass" } },
+          { "seat": "South", "call": { "kind": "pass" } },
+          { "seat": "West", "call": { "kind": "pass" } },
+          { "seat": "North", "call": { "kind": "pass" } }
+        ]
+      }
+    ]
+  }
+}

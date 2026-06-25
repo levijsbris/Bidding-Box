@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+.env
+.env.local
+.vite/
+playwright-report/
+test-results/
+.terraform/
+*.tfstate
+*.tfstate.*
+.idea/
+.vscode/*
+!.vscode/extensions.json

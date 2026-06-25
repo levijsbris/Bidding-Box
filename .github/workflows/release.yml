@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    name: Build + deploy web to production
+    runs-on: ubuntu-latest
+    if: ${{ vars.GCP_PROD_PROJECT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run test:coverage
+      - run: npm run build
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_PROD_DEPLOY_SA }}
+
+      - name: Deploy to production hosting
+        uses: google-github-actions/upload-cloud-storage@v2
+        with:
+          path: apps/web/dist
+          destination: ${{ vars.GCP_PROD_HOSTING_BUCKET }}
+          parent: false
+
+      # (deferred) trigger Capacitor native build + store submission here.

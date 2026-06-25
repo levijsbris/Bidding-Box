@@ -1,0 +1,42 @@
+name: Deploy (test)
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Build + deploy web to test
+    runs-on: ubuntu-latest
+    # Skipped until the GCP test project is wired up (hosting is the only GCP
+    # surface today; backend is deferred — ARCHITECTURE.md §5).
+    if: ${{ vars.GCP_PROJECT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Upload static build to hosting bucket
+        uses: google-github-actions/upload-cloud-storage@v2
+        with:
+          path: apps/web/dist
+          destination: ${{ vars.GCP_HOSTING_BUCKET }}
+          parent: false
+
+      # Smoke + E2E against the deployed test build run here once the URL exists.

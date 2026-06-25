@@ -1,0 +1,52 @@
+name: Infra
+
+on:
+  pull_request:
+    paths: ['infra/**']
+  push:
+    branches: [main]
+    paths: ['infra/**']
+
+permissions:
+  contents: read
+  id-token: write # Workload Identity Federation — no long-lived keys
+
+jobs:
+  terraform:
+    name: Terraform fmt / validate / plan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform/envs/test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Format check
+        run: terraform fmt -check -recursive ../..
+
+      # Auth + backend init only run once the GCP project is configured via repo
+      # variables. Until then the job stays a fmt/validate gate (backend deferred).
+      - name: Authenticate to GCP
+        if: ${{ vars.GCP_PROJECT_ID != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Init
+        if: ${{ vars.GCP_PROJECT_ID != '' }}
+        run: terraform init
+
+      - name: Validate
+        if: ${{ vars.GCP_PROJECT_ID != '' }}
+        run: terraform validate
+
+      - name: Plan
+        if: ${{ github.event_name == 'pull_request' && vars.GCP_PROJECT_ID != '' }}
+        run: terraform plan -input=false
+
+      - name: Apply (test)
+        if: ${{ github.event_name == 'push' && vars.GCP_PROJECT_ID != '' }}
+        run: terraform apply -auto-approve -input=false

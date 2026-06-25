@@ -1,0 +1,18 @@
+# Local development: just the frontend container (Vite + React with HMR). No
+# backend or GCP emulator is needed for the offline-only build — those return
+# with the deferred backend (ARCHITECTURE.md §5.3 / §10).
+services:
+  web:
+    image: node:20
+    working_dir: /workspace
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    ports:
+      - '5173:5173'
+    volumes:
+      - .:/workspace
+      - web_node_modules:/workspace/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  web_node_modules:
