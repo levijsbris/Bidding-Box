@@ -49,6 +49,38 @@ test.describe('responsive layout', () => {
     await expect(page.locator('.grid-table')).toBeVisible();
   });
 
+  test('phone: grid fills the centre without overlapping the seat cards (all turns)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Start Game' }).click();
+    await expect(page.locator('#preview')).toHaveAttribute('data-device', 'mobile');
+
+    const overlaps = async () =>
+      page.evaluate(() => {
+        const grid = document.querySelector('.grid-wrap')?.getBoundingClientRect();
+        const cards = [...document.querySelectorAll('.bid-seat')].map((c) => c.getBoundingClientRect());
+        if (!grid) return true;
+        const pad = 2;
+        return cards.some(
+          (c) =>
+            !(
+              grid.right - pad <= c.left ||
+              grid.left + pad >= c.right ||
+              grid.bottom - pad <= c.top ||
+              grid.top + pad >= c.bottom
+            ),
+        );
+      });
+
+    // Visit North → East → South → West (180°/270°/0°/90° grid rotations).
+    for (let i = 0; i < 4; i++) {
+      await expect(page.locator('.grid-wrap')).toBeVisible();
+      expect(await overlaps(), `turn ${i}`).toBe(false);
+      await expectButtonsOnScreen(page);
+      if (i < 3) await page.getByRole('button', { name: 'Pass', exact: true }).click();
+    }
+  });
+
   test('call buttons stay on-screen across a range of sizes', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Start Game' }).click();
