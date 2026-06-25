@@ -9,6 +9,10 @@ export default defineConfig({
   // '/' for local dev/preview and custom-domain hosting; the GitHub Pages build
   // sets VITE_BASE=/Bidding-Box/ so asset URLs resolve under the project path.
   base: process.env.VITE_BASE || '/',
+  // Dedicated port (default 5173 clashes with other local apps); host:true binds
+  // to the LAN so a tablet on the same Wi-Fi can reach it without extra flags.
+  server: { port: 5273, host: true, strictPort: true },
+  preview: { port: 5273, host: true },
   plugins: [
     react(),
     VitePWA({

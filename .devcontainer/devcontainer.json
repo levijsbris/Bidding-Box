@@ -4,7 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/terraform:1": {}
   },
-  "forwardPorts": [5173, 4173],
+  "forwardPorts": [5273, 4173],
   "postCreateCommand": "npm ci",
   "customizations": {
     "vscode": {
