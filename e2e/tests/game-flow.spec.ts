@@ -3,11 +3,9 @@ import { test, expect } from '@playwright/test';
 // Key user flows from ARCHITECTURE.md §11.1. The tablet project uses the full
 // grid; bids are reached by their accessible labels (suit shape + label).
 
-test.describe('tablet', () => {
-  test.skip(({ browserName }) => false, '');
-
+test.describe('full grid (desktop / tablet)', () => {
   test('F1/F3: new game → full auction → contract with correct declarer', async ({ page }, info) => {
-    test.skip(info.project.name !== 'tablet', 'full-grid flow runs on tablet');
+    test.skip(info.project.name === 'phone', 'full-grid flow runs on desktop/tablet');
     await page.goto('/');
 
     await page.getByRole('button', { name: 'Start Game' }).click();
@@ -24,7 +22,7 @@ test.describe('tablet', () => {
   });
 
   test('F6: bid history opens from the contract screen', async ({ page }, info) => {
-    test.skip(info.project.name !== 'tablet', 'full-grid flow runs on tablet');
+    test.skip(info.project.name === 'phone', 'full-grid flow runs on desktop/tablet');
     await page.goto('/');
     await page.getByRole('button', { name: 'Start Game' }).click();
     await page.getByLabel('1 No Trump').click();

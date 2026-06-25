@@ -14,12 +14,22 @@ import {
 import { seatToBid, type Call, type Level } from '../domain';
 import { applyPalette } from '../render/palettes';
 import { speakCall } from '../render/speak';
+import { useMediaQuery } from '../render/useMediaQuery';
+import { effectiveDisplay, type DisplayMode } from './display';
 import { reducer, initialState, type Action } from './reducer';
 import { loadGame, saveGame, clearGame } from './repository';
 import type { GameState, GridStyle } from './types';
 
 /** Which auction the Bid History overlay is showing: live board, a past board #, or closed. */
 export type HistoryBoard = 'live' | number | null;
+
+/** Device handling: follow the real viewport (`auto`) or pin a preview. */
+export type DeviceOverride = 'auto' | 'desktop' | 'mobile';
+
+// A phone-class viewport: too narrow for the full grid, or too short (landscape
+// phones). The full four-sided experience targets a tablet; below this we fall
+// back to Compact (PRODUCT.md §7, US-18).
+const MOBILE_QUERY = '(max-width: 820px), (max-height: 520px)';
 
 export interface GameContextValue {
   state: GameState;
@@ -33,8 +43,13 @@ export interface GameContextValue {
   setSettingsOpen: (open: boolean) => void;
   historyBoard: HistoryBoard;
   setHistoryBoard: (b: HistoryBoard) => void;
-  deviceMobile: boolean;
-  setDeviceMobile: (mobile: boolean) => void;
+
+  // responsive device state (viewport-driven, with optional preview override)
+  deviceMobile: boolean; // effective form factor used for layout
+  deviceOverride: DeviceOverride;
+  setDeviceOverride: (o: DeviceOverride) => void;
+  simulatePhone: boolean; // show the phone frame (simulating mobile on a wide screen)
+  display: DisplayMode; // how the bidding screen should render right now
 
   // action wrappers with side effects
   makeCall: (call: Call) => void;
@@ -51,8 +66,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [compactLevel, setCompactLevel] = useState<Level | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyBoard, setHistoryBoard] = useState<HistoryBoard>(null);
-  const [deviceMobile, setDeviceMobileState] = useState(false);
+  const [deviceOverride, setDeviceOverride] = useState<DeviceOverride>('auto');
   const hydrated = useRef(false);
+
+  // The app responds to the real viewport by default; the override only pins a
+  // preview for testing on a different-sized screen.
+  const viewportMobile = useMediaQuery(MOBILE_QUERY);
+  const deviceMobile =
+    deviceOverride === 'mobile' ? true : deviceOverride === 'desktop' ? false : viewportMobile;
+  // Only draw the simulated phone frame when forcing mobile on a wide screen;
+  // a genuinely narrow viewport fills the screen instead.
+  const simulatePhone = deviceOverride === 'mobile' && !viewportMobile;
+  const display = effectiveDisplay(state.settings, deviceMobile);
 
   // Resume a saved game on first load (US-19, E2E flow F9).
   useEffect(() => {
@@ -113,21 +138,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'newGame' });
   };
 
-  // Switching to a phone coerces unsupported layouts (only Compact fits, US-18).
-  const setDeviceMobile = (mobile: boolean) => {
-    setDeviceMobileState(mobile);
-    if (mobile) {
-      if (state.settings.biddingLayout === 'fourGrids') {
-        dispatch({
-          type: 'updateSettings',
-          patch: { biddingLayout: 'autoRotate', gridStyle: 'compact' },
-        });
-      } else if (state.settings.gridStyle === 'table') {
-        dispatch({ type: 'updateSettings', patch: { gridStyle: 'compact' } });
-      }
-    }
-  };
-
   const value: GameContextValue = {
     state,
     dispatch,
@@ -139,7 +149,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     historyBoard,
     setHistoryBoard,
     deviceMobile,
-    setDeviceMobile,
+    deviceOverride,
+    setDeviceOverride,
+    simulatePhone,
+    display,
     makeCall,
     undo,
     pickGrid,

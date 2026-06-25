@@ -6,15 +6,16 @@ import { serializeGame, deserializeGame, exportFilename, ImportError } from '../
 /** US-7/US-9/US-12: appearance, bidding layout, motion, and sound — plus game
  *  export/import (decided in scope for this build). */
 export function Settings() {
-  const { state, dispatch, setSettingsOpen, deviceMobile, pickGrid } = useGame();
+  const { state, dispatch, setSettingsOpen, deviceMobile, display, pickGrid } = useGame();
   const { settings } = state;
   const fileRef = useRef<HTMLInputElement>(null);
   const [importMsg, setImportMsg] = useState<string | null>(null);
 
-  const gridActive = (choice: 'table' | 'compact' | 'four') =>
-    choice === 'four'
-      ? settings.biddingLayout === 'fourGrids'
-      : settings.biddingLayout !== 'fourGrids' && settings.gridStyle === choice;
+  // Highlight what is actually rendering: the effective mode (Compact on a
+  // phone), which may differ from the saved tablet choice.
+  const activeChoice: 'table' | 'compact' | 'four' =
+    display.layout === 'fourGrids' ? 'four' : display.gridStyle;
+  const gridActive = (choice: 'table' | 'compact' | 'four') => choice === activeChoice;
 
   const exportGame = () => {
     const now = new Date().toISOString();

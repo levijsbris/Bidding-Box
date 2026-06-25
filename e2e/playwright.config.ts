@@ -16,8 +16,9 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    // Tablet centre-table is the primary target; a phone project exercises the
-    // Compact fallback (US-17/US-18).
+    // Desktop + tablet are the full-grid targets; a phone project exercises the
+    // Compact fallback (US-17/US-18). Desktop uses Chromium; tablet WebKit.
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'tablet', use: { ...devices['iPad (gen 7) landscape'] } },
     { name: 'phone', use: { ...devices['Pixel 5'] } },
   ],

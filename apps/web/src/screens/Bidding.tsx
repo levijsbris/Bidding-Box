@@ -17,8 +17,8 @@ import { RotateWrap } from '../render/RotateWrap';
 import { Suit, BigCallLabel } from '../render/Suit';
 
 export function Bidding() {
-  const { state } = useGame();
-  const { board, settings } = state;
+  const { state, display } = useGame();
+  const { board } = state;
   const turn = seatToBid(board.dealer, board.bids);
   const label = board.bids.length === 0 ? `${turn} to open` : `${turn}'s turn`;
 
@@ -26,11 +26,7 @@ export function Bidding() {
     <div className="app-shell">
       <TopBar centerLabel={label} />
       <div className="screen-body">
-        {settings.biddingLayout === 'fourGrids' ? (
-          <FourGrids turn={turn} />
-        ) : (
-          <AutoLayout turn={turn} />
-        )}
+        {display.layout === 'fourGrids' ? <FourGrids turn={turn} /> : <AutoLayout turn={turn} />}
       </div>
     </div>
   );
@@ -62,8 +58,8 @@ function AutoLayout({ turn }: { turn: Seat }) {
 }
 
 function BiddingGrid() {
-  const { state, compactLevel, setCompactLevel, makeCall } = useGame();
-  const { board, settings } = state;
+  const { state, display, compactLevel, setCompactLevel, makeCall } = useGame();
+  const { board } = state;
   const last = lastContractBid(board.bids);
   const legal = (c: Call) => isLegalCall(c, board.dealer, board.bids);
 
@@ -72,7 +68,7 @@ function BiddingGrid() {
 
   return (
     <div className="grid-wrap">
-      {settings.gridStyle === 'table' ? (
+      {display.gridStyle === 'table' ? (
         <div className="grid-table">
           {LEVELS.map((lvl) => (
             <div className="grid-row" key={lvl}>

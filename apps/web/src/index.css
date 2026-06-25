@@ -3,7 +3,10 @@
   --ink:#f4f7f4; --ink-dim:#bcd4c6; --accent:#e9c46a; --accent-ink:#1c2a20;
   --danger:#c0392b; --danger-ink:#fff; --line:#3a6e54; --focus:#ffe08a;
   --red-suit:#ff6b6b; --black-suit:#f4f7f4;
-  --tap:56px; --cell:42px;
+  /* Fluid sizing: targets scale with the smaller viewport dimension so the
+     centre-table layout flexes continuously between a phone and a large tablet,
+     while never dropping below an accessible minimum tap target. */
+  --tap:clamp(44px,8vmin,56px); --cell:clamp(33px,6.4vmin,42px);
   --font-display:'Fraunces',Georgia,serif; --font-body:'Inter',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
@@ -13,9 +16,12 @@ body{background:#0d0d0f;color:var(--ink);font-family:var(--font-body);-webkit-fo
 #preview #app{height:100%;width:100%;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;position:relative}
 #preview.preview--mobile{padding:24px}
 #preview.preview--mobile #app{width:390px;height:100%;max-height:844px;border-radius:36px;box-shadow:0 0 0 10px #1b1b1f,0 0 0 12px #303036,0 30px 60px rgba(0,0,0,.5)}
-#device-toggle{position:fixed;top:12px;right:12px;z-index:200;display:flex;gap:4px;background:#16161a;border:1px solid #2a2a30;border-radius:10px;padding:4px}
-#device-toggle button{border:none;background:transparent;color:#b8b8c0;font-family:inherit;font-weight:700;font-size:.8rem;padding:7px 13px;border-radius:7px;cursor:pointer}
+/* Dev-only preview affordance. Narrow, bottom-right, and click-through except on
+   its own buttons, so it never blocks the centred primary actions beneath it. */
+#device-toggle{position:fixed;bottom:10px;right:10px;z-index:200;display:flex;flex-direction:column;gap:3px;background:#16161a;border:1px solid #2a2a30;border-radius:9px;padding:3px;opacity:.9;pointer-events:none}
+#device-toggle button{border:none;background:transparent;color:#b8b8c0;font-family:inherit;font-weight:700;font-size:.72rem;padding:5px 12px;border-radius:6px;cursor:pointer;pointer-events:auto;text-align:left}
 #device-toggle button.dt-on{background:var(--accent);color:var(--accent-ink)}
+[data-device="mobile"] #device-toggle{transform:scale(.82);transform-origin:bottom right}
 [data-device="mobile"] .grid-wrap{--cell:36px;padding:9px}
 [data-device="mobile"] .pill--turn{display:none}
 [data-device="mobile"] .topbar{flex-wrap:nowrap;gap:5px;padding:8px 9px}
@@ -92,10 +98,12 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .auto-layout{position:absolute;inset:0}
 .auto-center{position:absolute;top:50%;left:50%;width:0;height:0}
 .seat-pos{position:absolute;width:0;height:0}
-.seat-pos--north{top:66px;left:50%}
-.seat-pos--south{bottom:90px;left:50%}
-.seat-pos--west{left:90px;top:50%}
-.seat-pos--east{right:90px;top:50%}
+/* Seat anchors scale with the viewport so the rotated bid strips stay clear of
+   the edges from a phone up to a large tablet. */
+.seat-pos--north{top:clamp(46px,8vmin,66px);left:50%}
+.seat-pos--south{bottom:clamp(60px,11vmin,90px);left:50%}
+.seat-pos--west{left:clamp(50px,11vmin,90px);top:50%}
+.seat-pos--east{right:clamp(50px,11vmin,90px);top:50%}
 
 .manual-layout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 .manual-controls{display:flex;align-items:center;gap:16px}
@@ -204,9 +212,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .trick-q{font-size:1.5rem;font-weight:800;font-family:var(--font-display)}
 .trick-contract{color:var(--ink-dim);margin-top:4px;display:flex;align-items:center;gap:5px;justify-content:center}
 .trick-contract strong{color:var(--ink);display:inline-flex;align-items:center;gap:4px}
-.trick-counter{display:flex;align-items:center;gap:18px}
-.trick-btn{width:72px;height:72px;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-size:2.2rem;font-weight:800;display:grid;place-items:center;border:none;cursor:pointer}
-.trick-num{width:104px;height:104px;border-radius:18px;background:var(--surface-2);display:grid;place-items:center;font-size:3.4rem;font-weight:800;font-family:var(--font-display)}
+.trick-counter{display:flex;align-items:center;gap:clamp(10px,3vmin,18px)}
+.trick-btn{width:clamp(54px,11vmin,72px);height:clamp(54px,11vmin,72px);border-radius:16px;background:var(--accent);color:var(--accent-ink);font-size:clamp(1.6rem,4.5vmin,2.2rem);font-weight:800;display:grid;place-items:center;border:none;cursor:pointer}
+.trick-num{width:clamp(78px,16vmin,104px);height:clamp(78px,16vmin,104px);border-radius:18px;background:var(--surface-2);display:grid;place-items:center;font-size:clamp(2.4rem,7vmin,3.4rem);font-weight:800;font-family:var(--font-display)}
 .trick-actions{display:flex;gap:12px}
 
 .bh-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:60}
@@ -294,3 +302,16 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 [data-device="mobile"] .fourcard{width:150px;height:150px}
 [data-device="mobile"] .contract-actions{bottom:12px;gap:8px;flex-wrap:wrap;padding:0 8px}
 [data-device="mobile"] .contract-actions .btn-primary{padding:10px 16px;font-size:.92rem;min-height:46px}
+
+/* mobile score sheet: smaller cells so all six columns fit a phone width */
+[data-device="mobile"] .score-panel .score-title{font-size:1.35rem}
+[data-device="mobile"] .score-panel .score-table{font-size:.74rem}
+[data-device="mobile"] .score-panel .score-table th{padding:6px 3px}
+[data-device="mobile"] .score-panel .score-table td{padding:6px 3px}
+[data-device="mobile"] .score-zone{padding:8px 8px}
+
+/* very short viewports (landscape phones): trim the New Game vertical rhythm */
+@media (max-height:520px){
+  .center-col{gap:14px;padding:14px}
+  .score-title{font-size:1.5rem;margin:4px 0 10px}
+}
