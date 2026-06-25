@@ -68,6 +68,10 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .call-btn:disabled{opacity:.32;cursor:not-allowed}
 .call-btn--selected{border-color:var(--accent)}
 .call-btn--special{background:var(--accent);color:var(--accent-ink)}
+/* Special buttons (Pass/X/XX) stay gold on hover — without this they inherit the
+   generic green hover background while keeping dark text, which looks wrong and
+   sticks under the cursor after a click when the grid rotates to the next seat. */
+.call-btn--special:hover:not(:disabled){background:var(--accent);filter:brightness(1.06)}
 .suit-red{color:var(--red-suit)}
 .suit-black{color:var(--black-suit)}
 .h1{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em}

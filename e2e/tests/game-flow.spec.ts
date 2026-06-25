@@ -44,3 +44,18 @@ test('F8: palette and settings overlay open', async ({ page }) => {
   await page.getByRole('button', { name: 'Close settings' }).click();
   await expect(page.getByRole('heading', { name: 'New Game' })).toBeVisible();
 });
+
+// Regression: special call buttons (Pass/X/XX) must keep their gold background on
+// hover — the generic green hover used to bleed through and stick under the
+// cursor after a click, showing green-on-black for the next bidder.
+test('Pass button stays gold on hover', async ({ page }, info) => {
+  test.skip(info.project.name === 'phone', 'hover semantics differ on touch');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Start Game' }).click();
+  const pass = page.getByRole('button', { name: 'Pass', exact: true });
+  await pass.hover();
+  // Felt Green accent (gold), not the green hover surface (rgb(54,117,86)).
+  await expect.poll(() => pass.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+    'rgb(233, 196, 106)',
+  );
+});
