@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   biddingLayout: 'autoRotate',
   animations: true,
   sound: false,
+  accessibility: false,
 };
 
 export function initialState(): GameState {

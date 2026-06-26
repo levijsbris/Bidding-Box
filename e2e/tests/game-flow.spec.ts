@@ -45,6 +45,22 @@ test('F8: palette and settings overlay open', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'New Game' })).toBeVisible();
 });
 
+// Extra-large mode flips data-accessible; on the table each seat's bid strip is
+// double-sided (a mirrored copy for the opposite side).
+test('Accessibility mode + double-sided bid strips', async ({ page }, info) => {
+  test.skip(info.project.name === 'phone', 'table layout; double-sided is off on phones');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('switch', { name: 'Extra-large mode' }).click();
+  await page.getByRole('button', { name: 'Close settings' }).click();
+  await expect(page.locator('#preview')).toHaveAttribute('data-accessible', 'true');
+
+  await page.getByRole('button', { name: 'Start Game' }).click();
+  await page.getByLabel('1 Clubs').click(); // North bids 1♣
+  // North now has a mirrored (aria-hidden) copy of its strip.
+  await expect(page.locator('.bid-seat--mirror')).toHaveCount(1);
+});
+
 // Keyboard accessibility: the Settings dialog opens with focus moved into it,
 // closes on Escape, and returns focus to the trigger.
 test('Settings dialog: Escape closes and restores focus', async ({ page }, info) => {

@@ -3,21 +3,24 @@
 // pre-rotation strip never pushes the layout off-screen when sideways
 // (ported from the prototype's rotateWrap).
 
-import type { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { SEAT_ANGLE, type Seat } from '../domain';
 
 export function RotateWrap({
   facing,
   enabled = true,
   animations,
+  angle: angleOverride,
   children,
 }: {
   facing: Seat;
   enabled?: boolean;
   animations: boolean;
+  /** Explicit rotation in degrees (used for the continuously-tracked centre grid). */
+  angle?: number;
   children: ReactNode;
 }) {
-  const angle = enabled ? SEAT_ANGLE[facing] : 0;
+  const angle = angleOverride ?? (enabled ? SEAT_ANGLE[facing] : 0);
   const transition = animations ? 'transform .55s cubic-bezier(.4,0,.2,1)' : 'none';
   return (
     <span style={{ position: 'relative', display: 'inline-block', width: 0, height: 0 }}>

@@ -276,6 +276,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .row-flex{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .settings-actions{display:flex;gap:10px;flex-wrap:wrap}
 
+/* double-sided strip: primary (faces seat) + a 180° mirror (faces opposite seat) */
+.bid-seat-stack{display:flex;flex-direction:column;align-items:center;gap:8px}
+.bid-seat--mirror{transform:rotate(180deg)}
 .bid-seat{display:flex;flex-direction:row;align-items:center;gap:10px;background:var(--surface);border-radius:16px;padding:10px 12px;border:2px solid transparent}
 .bid-seat--active{border-color:var(--accent)}
 .bc-head{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto}
@@ -326,3 +329,36 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
   .center-col{gap:14px;padding:14px}
   .score-title{font-size:1.5rem;margin:4px 0 10px}
 }
+
+/* ===== Accessibility (extra-large) mode =====
+   Scales text and controls up across all screens for low vision / limited
+   dexterity. The bidding grid grows via its measured fit transform (higher cap),
+   so its contents — including suit glyphs — scale together. */
+[data-accessible="true"]{--tap:clamp(56px,10vmin,84px);--cell:clamp(46px,9vmin,72px)}
+[data-accessible="true"] .pill{font-size:1.05rem;padding:9px 15px}
+[data-accessible="true"] .icon-btn{font-size:1.8rem}
+[data-accessible="true"] .btn-primary{font-size:1.3rem;padding:16px 30px;min-height:64px}
+[data-accessible="true"] .compact-hint{font-size:1.25rem}
+[data-accessible="true"] .row-label{font-size:1.5rem}
+/* per-seat bid cards */
+[data-accessible="true"] .bc-card{min-width:62px;min-height:68px}
+[data-accessible="true"] .bc-lvl{font-size:1.9rem}
+[data-accessible="true"] .bc-word{font-size:1.6rem}
+[data-accessible="true"] .bc-name{font-size:1.25rem}
+[data-accessible="true"] .bc-back{width:58px;height:58px;font-size:1.5rem}
+/* contract card + role badges */
+[data-accessible="true"] .fourcard{transform:scale(1.4)}
+[data-accessible="true"] .role-badge{padding:20px 28px}
+[data-accessible="true"] .role-seat{font-size:1.7rem}
+[data-accessible="true"] .role-name{font-size:1.2rem}
+[data-accessible="true"] .role-note{font-size:1rem}
+/* trick counter */
+[data-accessible="true"] .trick-q{font-size:2rem}
+[data-accessible="true"] .trick-contract{font-size:1.3rem}
+[data-accessible="true"] .trick-btn{width:clamp(72px,14vmin,98px);height:clamp(72px,14vmin,98px);font-size:2.8rem}
+[data-accessible="true"] .trick-num{width:clamp(112px,22vmin,150px);height:clamp(112px,22vmin,150px);font-size:clamp(3.6rem,9vmin,5rem)}
+/* score sheet */
+[data-accessible="true"] .score-title{font-size:2.4rem}
+[data-accessible="true"] .score-table{font-size:1.2rem}
+[data-accessible="true"] .score-table th{padding:12px 8px}
+[data-accessible="true"] .score-table td{padding:14px 8px}

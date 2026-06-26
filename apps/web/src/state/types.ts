@@ -12,6 +12,8 @@ export interface GameSettings {
   biddingLayout: BiddingLayout;
   animations: boolean;
   sound: boolean;
+  /** Extra-large mode: scales text and controls up across all screens. */
+  accessibility: boolean;
 }
 
 /** The board currently in play. */

@@ -147,6 +147,18 @@ export function Settings() {
         </section>
 
         <section className="settings-card">
+          <h3>Accessibility</h3>
+          <Toggle
+            on={settings.accessibility}
+            onToggle={() =>
+              dispatch({ type: 'updateSettings', patch: { accessibility: !settings.accessibility } })
+            }
+            label="Extra-large mode"
+            sub="Maximise text, buttons, and the bidding grid for low vision and limited dexterity"
+          />
+        </section>
+
+        <section className="settings-card">
           <h3>Audio</h3>
           <Toggle
             on={settings.sound}

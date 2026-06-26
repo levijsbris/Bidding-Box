@@ -14,6 +14,7 @@ import {
 import { useGame } from '../state/GameContext';
 import { TopBar } from '../components/TopBar';
 import { RotateWrap } from '../render/RotateWrap';
+import { useFacingAngle } from '../render/useFacingAngle';
 import { Suit, BigCallLabel } from '../render/Suit';
 
 export function Bidding() {
@@ -42,20 +43,26 @@ export function Bidding() {
 function AutoLayout({ turn }: { turn: Seat }) {
   const { state, deviceMobile, display } = useGame();
   const { settings } = state;
+  const accessible = settings.accessibility;
   const layoutRef = useRef<HTMLDivElement>(null);
+  // Continuous angle so the centre grid rotates the short way each turn.
+  const gridAngle = useFacingAngle(turn);
   // Grow the active bidder's grid to fill the space between the seat cards. On a
   // phone the four-sided layout is tight, so this reclaims the empty centre and
   // gives comfortable touch targets; it never overlaps the cards (measured).
-  useFitAutoGrid(layoutRef, turn, deviceMobile ? 1.7 : 1, [
+  // Accessibility mode lets it grow much larger to fill the table.
+  const maxScale = accessible ? (deviceMobile ? 2.8 : 3.4) : deviceMobile ? 1.7 : 1;
+  useFitAutoGrid(layoutRef, turn, maxScale, [
     turn,
     state.board.bids.length,
     display.gridStyle,
     deviceMobile,
+    accessible,
   ]);
   return (
     <div className="auto-layout" ref={layoutRef}>
       <div className="auto-center">
-        <RotateWrap facing={turn} animations={settings.animations}>
+        <RotateWrap facing={turn} animations={settings.animations} angle={gridAngle}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
             <BiddingGrid />
           </div>
@@ -103,10 +110,10 @@ function useFitAutoGrid(
     };
     const W = layout.clientWidth;
     const H = layout.clientHeight;
-    const west = rectOf('.seat-pos--west .bid-seat');
-    const east = rectOf('.seat-pos--east .bid-seat');
-    const north = rectOf('.seat-pos--north .bid-seat');
-    const south = rectOf('.seat-pos--south .bid-seat');
+    const west = rectOf('.seat-pos--west .bid-seat-stack');
+    const east = rectOf('.seat-pos--east .bid-seat-stack');
+    const north = rectOf('.seat-pos--north .bid-seat-stack');
+    const south = rectOf('.seat-pos--south .bid-seat-stack');
 
     const margin = 14;
     const freeW = (east ? east.left : W) - (west ? west.right : 0) - margin * 2;
@@ -257,40 +264,54 @@ function SeatCard({ seat, turn }: { seat: Seat; turn: Seat }) {
   const lastBidder = bids.length ? bids[bids.length - 1].seat : null;
   const isLastBidder = lastBidder === seat;
   const canUndo = bids.length > 0;
+  // On the table (non-mobile) each strip is double-sided: a 180°-mirrored copy of
+  // the cards so this seat's bids are readable from the opposite side too.
+  const doubleSided = !deviceMobile && mine.length > 0;
+
+  const cards = (
+    <div className="bc-cards">
+      {mine.length === 0 ? (
+        <div className="bc-empty">—</div>
+      ) : (
+        <>
+          {more > 0 && <span className="bc-more">+{more}</span>}
+          {mine.map((b, i) => {
+            const isNewest = isLastBidder && i === mine.length - 1;
+            return (
+              <span key={i} className={`bc-card ${isNewest ? 'bc-card--newest' : ''}`}>
+                <BigCallLabel call={b.call} />
+              </span>
+            );
+          })}
+        </>
+      )}
+    </div>
+  );
 
   return (
-    <div className={`bid-seat ${active ? 'bid-seat--active' : ''}`}>
-      <div className="bc-head">
-        <button
-          className={`bc-back ${isLastBidder ? 'bc-back--live' : ''}`}
-          disabled={!canUndo}
-          onClick={undo}
-          aria-label={`Undo last bid (${seat})`}
-        >
-          ↺
-        </button>
-        <div className="bc-name">
-          {seat}
-          {active && <span className="bc-turn">to bid</span>}
+    <div className="bid-seat-stack">
+      <div className={`bid-seat ${active ? 'bid-seat--active' : ''}`}>
+        <div className="bc-head">
+          <button
+            className={`bc-back ${isLastBidder ? 'bc-back--live' : ''}`}
+            disabled={!canUndo}
+            onClick={undo}
+            aria-label={`Undo last bid (${seat})`}
+          >
+            ↺
+          </button>
+          <div className="bc-name">
+            {seat}
+            {active && <span className="bc-turn">to bid</span>}
+          </div>
         </div>
+        {cards}
       </div>
-      <div className="bc-cards">
-        {mine.length === 0 ? (
-          <div className="bc-empty">—</div>
-        ) : (
-          <>
-            {more > 0 && <span className="bc-more">+{more}</span>}
-            {mine.map((b, i) => {
-              const isNewest = isLastBidder && i === mine.length - 1;
-              return (
-                <span key={i} className={`bc-card ${isNewest ? 'bc-card--newest' : ''}`}>
-                  <BigCallLabel call={b.call} />
-                </span>
-              );
-            })}
-          </>
-        )}
-      </div>
+      {doubleSided && (
+        <div className="bid-seat bid-seat--mirror" aria-hidden="true">
+          {cards}
+        </div>
+      )}
     </div>
   );
 }

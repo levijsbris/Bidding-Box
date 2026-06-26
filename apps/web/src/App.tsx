@@ -28,6 +28,7 @@ export function App() {
         id="preview"
         className={simulatePhone ? 'preview--mobile' : ''}
         data-device={deviceMobile ? 'mobile' : 'desktop'}
+        data-accessible={state.settings.accessibility ? 'true' : undefined}
       >
         <main id="app">
           {screen === 'newGame' && <NewGame />}

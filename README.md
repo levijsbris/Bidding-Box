@@ -89,3 +89,10 @@ Treated as acceptance criteria, not polish, and held to **WCAG 2.1/2.2 AA**:
 - **Zoom** — pinch/zoom is allowed (no `user-scalable=no`).
 - **Screen readers** — `<main>` landmark; polite live regions announce whose
   turn it is and the derived contract; all icon buttons carry labels.
+- **Extra-large mode** — a Settings toggle that scales text, controls, and the
+  bidding grid up across every screen for low vision / limited dexterity (works
+  alongside any bidding layout; Compact gives the largest targets).
+- **Double-sided bid strips** — on the table view each seat's bids also render
+  180°-mirrored so they're readable from the opposite side.
+- **Rotation** — the centre panel always turns the shorter way (≤180°) following
+  the clockwise play order, so it never does a disorienting long spin.
