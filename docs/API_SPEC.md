@@ -1,8 +1,17 @@
 # Bridge Table Companion — API Specification
 
-This document specifies the API supporting the Bridge Table Companion UI. Endpoints are organised around the screens and user actions of the app (New Game → Bidding → Contract → Tricks → Score, plus Settings and Bid History) and back onto the Firestore data model in `DATA_MODEL.md`.
+> **Status: DEFERRED — not built.** The shipped app is **offline-only** with no
+> backend; this specifies a future online/multi-device service. It is kept so
+> today's client stays compatible with it.
+>
+> **The rules and scoring in §6 are live today** — implemented as the pure
+> on-device TypeScript engine in `apps/web/src/domain` (`auction.ts`, `scoring.ts`,
+> `rotation.ts`) and verified by golden fixtures. §6 is therefore the canonical
+> statement of behaviour for both the current client engine and any future server.
 
-The API enforces all Bridge rules server-side — legal-bid validation, auction completion, declarer derivation, and duplicate scoring — so no client can record an illegal call or a forged score. Clients send *intent* (a call, a trick count); the server returns *truth* (the updated board, the derived contract, the score).
+This document specifies the API that would support the Bridge Table Companion UI. Endpoints are organised around the screens and user actions of the app (New Game → Bidding → Contract → Tricks → Score, plus Settings and Bid History) and back onto the deferred Firestore data model in `DATA_MODEL.md`.
+
+The API would enforce all Bridge rules server-side — legal-bid validation, auction completion, declarer derivation, and duplicate scoring — so no client can record an illegal call or a forged score. Clients send *intent* (a call, a trick count); the server returns *truth* (the updated board, the derived contract, the score). **Today the client engine is that authority.**
 
 > **Transport.** Specified as REST/JSON for clarity. The natural Firebase implementation is HTTPS Callable Functions (one callable per operation) backed by Firestore transactions, with real-time screens using Firestore listeners directly rather than polling these endpoints.
 
@@ -415,7 +424,7 @@ flowchart TD
     DERIVE --> OK2[200 status=contract]
 ```
 
-These mirror the prototype's engine exactly: legal-bid ranking (♣<♦<♥<♠<NT), double/redouble eligibility, completion after three passes following a bid (or four passes from the open), declarer = first of the winning pair to name the final strain, and full duplicate scoring with vulnerability, slam bonuses, and doubled penalties.
+These mirror the shipped client engine exactly (`apps/web/src/domain`): legal-bid ranking (♣<♦<♥<♠<NT), double/redouble eligibility, completion after three passes following a bid (or four passes from the open), declarer = first of the winning pair to name the final strain, and full duplicate scoring with vulnerability, slam bonuses, and doubled penalties. The same scenarios are covered by `scoring.fixtures.ts` and the `auction`/`scoring` unit tests.
 
 ---
 

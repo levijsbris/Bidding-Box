@@ -1,8 +1,101 @@
-# Bridge Table Companion — Firestore Data Model
+# Bridge Table Companion — Data Model
 
-This document specifies the database schema for the Bridge Table Companion on **Cloud Firestore** (Firebase). Firestore is a document database, so the "tables" below are **collections**, rows are **documents**, and "columns" are **document fields**. The design is optimised for the app's real access patterns: a short-lived game session, an append-heavy auction, and a score sheet read simultaneously from all four sides of one device.
+This document covers two layers:
 
-> **Scope note.** The prototype runs fully offline as a single file with no backend. This schema describes the data model for the *online-capable* version (session persistence, resume-after-reload, optional multi-device sync). The local app maps to the same shapes so the two stay compatible.
+- **§0 — the as-built local model (IndexedDB).** What the shipped offline app
+  actually stores today.
+- **§1 onward — the deferred Firestore model.** The schema for a future
+  online-capable backend, kept aligned so the two stay compatible.
+
+> **Scope note.** The app is **offline-only and built**. Persistence is the
+> browser's **IndexedDB**; there is no backend. The Firestore design from §1
+> onward is **deferred** (session persistence across devices, multi-device sync)
+> and is documented so today's shapes don't paint us into a corner.
+
+---
+
+## 0. As-built local model (IndexedDB)
+
+The shipped app persists the **entire game** as a single document under one key,
+which is all an offline single-device game needs. See
+`apps/web/src/state/types.ts` and `apps/web/src/state/repository.ts`.
+
+- **Database:** `bridge-table-companion` · **object store:** `game` · **key:**
+  `current` (one in-progress/last game). A `migrate()` seam upgrades older
+  documents by `schemaVersion`.
+- The same shape is the **export/import** format (wrapped with an `app` tag and
+  `exportedAt`) and the **seed fixture** format (`seed/fixtures/*.json`).
+
+```mermaid
+erDiagram
+    GAME ||--|| SETTINGS : has
+    GAME ||--|| BOARD : "current board"
+    GAME ||--o{ HISTORY : "scored boards"
+    BOARD ||--o{ BIDENTRY : auction
+    HISTORY ||--o{ BIDENTRY : auction
+    BIDENTRY ||--|| CALL : is
+
+    GAME {
+        int schemaVersion
+        string screen "newGame|bidding|contract|tricks|score"
+        boolean trackVulnerability
+        boolean calculateScore
+    }
+    SETTINGS {
+        string palette "Felt Green|Navy Blue|High Contrast|Warm Parchment"
+        string gridStyle "table|compact"
+        string biddingLayout "autoRotate|fourGrids"
+        boolean animations
+        boolean sound
+        boolean accessibility "extra-large mode"
+    }
+    BOARD {
+        int boardNumber
+        string dealer "North|East|South|West"
+        string vulnerability "None|NS|EW|Both"
+        contract contract "null if passed out"
+        int nsTricks
+    }
+    HISTORY {
+        int board
+        string dealer
+        contract contract
+        int nsTricks
+        int scoreNS
+        int scoreEW
+    }
+    CALL {
+        string kind "bid|pass|double|redouble"
+        int level "1-7 for bid"
+        string strain "C|D|H|S|NT for bid"
+    }
+```
+
+| Type | Fields | Notes |
+|---|---|---|
+| `GameState` | `schemaVersion`, `screen`, `trackVulnerability`, `calculateScore`, `settings`, `board`, `history[]` | The whole persisted document. |
+| `GameSettings` | `palette`, `gridStyle`, `biddingLayout`, `animations`, `sound`, `accessibility` | Carries the extra-large accessibility toggle. |
+| `BoardState` | `boardNumber`, `dealer`, `vulnerability`, `bids[]`, `contract`, `nsTricks` | The live board. `vulnerability` is `None` when tracking is off. |
+| `HistoryEntry` | `board`, `dealer`, `contract`, `nsTricks`, `scoreNS`, `scoreEW`, `bids[]` | One per completed board; recorded even when scoring is off or passed out (so past auctions stay reviewable). |
+| `BidEntry` | `seat`, `call` | The canonical auction; `call` is a discriminated union (`bid`/`pass`/`double`/`redouble`). |
+| `Contract` | `level`, `strain`, `declarer`, `doubled` | Derived on auction completion; `null` for a passed-out board. |
+
+**Relationship to the Firestore model below.** The local `board.bids[]` array is
+the equivalent of the `calls` subcollection; `history[]` is the equivalent of the
+`scoreSummary.rows` / per-board scores. Because a single offline device reads and
+writes one game, the local model favours one self-contained document over the
+normalised, denormalised-for-fan-out Firestore design.
+
+---
+
+# Deferred: Firestore Data Model
+
+The remainder of this document specifies the schema for a future **Cloud
+Firestore** (Firebase) backend — **deferred, not built**. Firestore is a document
+database, so the "tables" below are **collections**, rows are **documents**, and
+"columns" are **document fields**. The design is optimised for the app's real
+access patterns: a short-lived game session, an append-heavy auction, and a score
+sheet read simultaneously from all four sides of one device.
 
 ---
 

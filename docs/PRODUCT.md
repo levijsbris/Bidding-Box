@@ -31,7 +31,7 @@ The product was shaped around a real table: a player, their brother, and their g
 | **Accessibility is the default, not an add-on** | Large high-contrast text, big tap targets, four colour palettes, no reliance on sound, and a no-rotation mode for motion sensitivity. |
 | **Real Bridge, enforced** | Only legal calls are offered. Doubles, redoubles, declarer, and duplicate scoring are derived automatically — no rules arguments. |
 | **Responsive to the room** | Works best on a tablet centre-table, scales to fit the screen, and falls back gracefully to a phone. |
-| **Zero setup** | A single self-contained file. No install, no account, no network. Open and play. |
+| **Zero setup** | No account, no network. Open in a browser and play; installable to the home screen for a fullscreen, offline, app-like experience. |
 
 ## 5. The experience, end to end
 
@@ -118,6 +118,10 @@ flowchart TD
 
 In **Four grids** mode the layout is edge-pinned and auto-scales to fit the screen, so all four grids stay fully on-screen from a large tablet down to a phone, and no block is ever clipped as content grows. Each seat also shows its own bid-card strip, large enough to read across the table.
 
+**Responsive by default.** The app adapts to the actual screen size — resizing the window or switching device reflows the layout automatically (only Compact is offered on a phone). The auto-rotate centre panel and the four-grids cluster scale to fill the available space without clipping. The rotating centre panel always turns the **shorter way** as play moves clockwise, so it never does a disorienting full spin, and South stays upright.
+
+**Double-sided bid strips.** On the table view each seat's bid strip is double-sided — its bids are mirrored so they can be read from the opposite side of the table as well, not just by the owning player.
+
 ### 6.3 Accessibility features
 
 ```mermaid
@@ -140,14 +144,20 @@ mindmap
       Respects reduced-motion setting
 ```
 
-- **Vision** — large type and controls throughout; four palettes (Felt Green, Navy Blue, High Contrast, Warm Parchment) switchable live; suits always carry a shape **and** a label, never colour alone, for colour-blind players.
+- **Vision** — large type and controls throughout; four palettes (Felt Green, Navy Blue, High Contrast, Warm Parchment) switchable live, all meeting WCAG AA contrast; suits always carry a shape **and** a label, never colour alone, for colour-blind players.
+- **Extra-large mode** — a single Settings toggle scales text, controls, and the bidding grid up across every screen, for low vision and limited dexterity. It works alongside any bidding layout (Compact gives the largest targets).
+- **Keyboard & screen reader** — Settings and Bid History are focus-managed dialogs (focus moves in, Tab is trapped, Escape closes, focus returns); whose-turn and the derived contract are announced via live regions; pinch-zoom is never disabled.
 - **Motor** — generous tap targets sized for arthritic hands; the undo control is reachable from every seat.
 - **Hearing** — no information is ever conveyed by sound alone. Spoken bid announcements are an optional extra, off by default.
 - **Vestibular** — an Animations toggle disables rotation and transitions; the Four grids mode removes rotation entirely; the app honours the operating system's "reduce motion" preference automatically.
 
 ### 6.4 Scoring
 
-Full duplicate-Bridge scoring is computed automatically once the trick count is entered: contract trick values, the game/part-score bonus, small- and grand-slam bonuses, doubled and redoubled trick scores and insult bonuses, overtricks, and undertrick penalties — all adjusted for vulnerability. A running total is maintained across the session and shown on a dual-readable score sheet.
+Full duplicate-Bridge scoring is computed automatically once the trick count is entered: contract trick values, the game/part-score bonus, small- and grand-slam bonuses, doubled and redoubled trick scores and insult bonuses, overtricks, and undertrick penalties — all adjusted for vulnerability. A running total is maintained across the session and shown on a dual-readable score sheet. (When "Track Vulnerability" is off, every board is scored non-vulnerable.)
+
+### 6.6 Saving & portability
+
+The game persists automatically to the device and **resumes after a reload or app restart**. A game can also be **exported to a JSON file and imported** on another device — a lightweight backup and transfer, since data otherwise lives only in the browser. The app installs to the home screen (PWA) for a fullscreen, offline, app-like experience.
 
 ### 6.5 Bid History
 
@@ -170,7 +180,7 @@ flowchart LR
 - **Primary target**: a tablet or iPad laid flat in the table centre — the true four-sided experience.
 - **Desktop**: fully supported for development and play.
 - **Phone**: a graceful fallback. It still sits centre-table, but some information is condensed and Full grid / Four grids are unavailable — only Compact fits a phone, and the app communicates this clearly.
-- **Architecture**: a single self-contained file (markup, styles, and logic together). No build step to run it, no network, no account.
+- **Architecture**: a React + TypeScript PWA served as static files. No network or account to play; installable to the home screen and fully offline once loaded.
 
 ---
 
@@ -205,6 +215,7 @@ Grouped by player need. Each is phrased as *As a … I want … so that …* wit
 *As a player on any side of the table, I want to read the bidding without rotating the device so that I can follow along comfortably.*
 - Content faces each seat (rotated, or fixed-per-edge in Four grids mode).
 - Each seat sees its own bid history at a readable size.
+- On the table view, bid strips are double-sided so a seat's bids can also be read from the opposite side.
 
 **US-6 — Undo a mistake**
 *As any player, I want to undo the last call so that a misclick can be corrected without restarting.*
@@ -226,6 +237,7 @@ Grouped by player need. Each is phrased as *As a … I want … so that …* wit
 *As a player with low vision, I want large, high-contrast text and a high-contrast palette so that I can read every element.*
 - Large type and controls throughout.
 - A High Contrast palette is available and switches live.
+- An Extra-large mode scales the entire interface up across all screens.
 
 **US-10 — Distinguish suits without colour (colour-blind)**
 *As a colour-blind player, I want suits identified by shape and label so that I never rely on colour alone.*
@@ -269,6 +281,7 @@ Grouped by player need. Each is phrased as *As a … I want … so that …* wit
 *As a host without a tablet, I want the app to still work on a phone so that we can play anyway.*
 - Compact mode fits a phone; unsupported modes are disabled with a clear reason.
 - The app communicates that some information is condensed on a phone.
+- The device form factor is detected automatically and the layout reflows as the screen size changes (no manual switch needed).
 
 **US-19 — Just open it**
 *As a host, I want no install, account, or network so that setup is instant anywhere.*
