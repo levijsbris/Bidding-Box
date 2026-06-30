@@ -6,7 +6,7 @@
   /* Fluid sizing: targets scale with the smaller viewport dimension so the
      centre-table layout flexes continuously between a phone and a large tablet,
      while never dropping below an accessible minimum tap target. */
-  --tap:clamp(44px,8vmin,56px); --cell:clamp(33px,6.4vmin,42px);
+  --tap:clamp(44px,8vmin,56px);
   --font-display:'Fraunces',Georgia,serif; --font-body:'Inter',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
@@ -28,33 +28,12 @@ body{background:#0d0d0f;color:var(--ink);font-family:var(--font-body);-webkit-fo
 [data-device="mobile"] .topbar .icon-btn{flex:0 0 auto;width:34px;height:34px}
 .grid-choice:disabled{opacity:.45;cursor:not-allowed}
 .gc-reason{display:block;font-size:.62rem;color:var(--ink-dim);font-weight:600;margin-top:2px}
-/* slim seat cards on a phone so the centre grid has room to grow */
-[data-device="mobile"] .bid-seat{padding:6px 8px;gap:7px;border-width:2px}
-[data-device="mobile"] .mc-card{width:46px;height:64px}
-[data-device="mobile"] .mc-idx .mc-lvl{font-size:14px}
-[data-device="mobile"] .mc-idx .mc-suit{font-size:12px}
-[data-device="mobile"] .mc-centre{font-size:20px}
-[data-device="mobile"] .mc-centre--nt{font-size:16px}
-[data-device="mobile"] .mc-card--call .mc-word--mid{font-size:15px}
-[data-device="mobile"] .bc-name{font-size:.82rem}
-[data-device="mobile"] .bc-back{width:36px;height:36px;font-size:1.15rem}
-[data-device="mobile"] .seat-pos--west{left:34px}
-[data-device="mobile"] .seat-pos--east{right:34px}
-/* Comfortable compact base; useFitAutoGrid scales it up to fill the centre. */
-[data-device="mobile"] .grid-wrap{--cell:38px;padding:9px}
-[data-device="mobile"] .compact-levels{grid-template-columns:repeat(4,var(--cell));gap:9px}
-[data-device="mobile"] .compact-levels .call-btn{font-size:1.5rem}
-[data-device="mobile"] .compact-hint{font-size:.95rem}
-[data-device="mobile"] .compact-strains{grid-template-columns:repeat(5,34px);gap:9px}
-[data-device="mobile"] .compact-strains .call-btn{width:34px;height:38px}
-[data-device="mobile"] .special-row{gap:9px}
-[data-device="mobile"] .special-row .call-btn{min-height:46px}
 button{font-family:inherit;color:var(--ink);cursor:pointer;border:none;background:none}
 button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* Visually hidden but available to screen readers (used for live announcements). */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .no-anim *{transition:none !important;animation:none !important}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.full .scrollwrap{scroll-behavior:auto}}
 
 .app-shell{height:100%;display:flex;flex-direction:column;background:var(--bg)}
 .topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;flex:0 0 auto;flex-wrap:wrap}
@@ -67,18 +46,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .icon-btn:hover{background:var(--surface-2)}
 .screen-body{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}
 
-.call-btn{min-width:var(--cell);min-height:var(--cell);border-radius:12px;background:var(--surface-2);color:var(--ink);font-weight:700;display:grid;place-items:center;line-height:1.05;transition:transform .12s,background .12s;border:2px solid transparent}
-.call-btn:hover:not(:disabled){background:var(--surface-3)}
-.call-btn:active:not(:disabled){transform:scale(.96)}
-.call-btn:disabled{opacity:.32;cursor:not-allowed}
-.call-btn--selected{border-color:var(--accent)}
-.call-btn--special{background:var(--accent);color:var(--accent-ink)}
-/* Special buttons (Pass/X/XX) stay gold on hover — without this they inherit the
-   generic green hover background while keeping dark text, which looks wrong and
-   sticks under the cursor after a click when the grid rotates to the next seat. */
-.call-btn--special:hover:not(:disabled){background:var(--accent);filter:brightness(1.06)}
 .suit-red{color:var(--red-suit)}
 .suit-black{color:var(--black-suit)}
+.call-inline{display:inline-flex;align-items:center;gap:2px;font-weight:700}
 .h1{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em}
 .center-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:24px}
 
@@ -91,55 +61,157 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .btn-primary:hover{background:var(--surface-2)}
 .btn-primary--filled{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 
-.grid-wrap{background:var(--surface);border-radius:18px;padding:12px;display:inline-flex;flex-direction:column;gap:10px;box-shadow:0 8px 28px rgba(0,0,0,.25);transform:scale(var(--auto-grid-scale,1));transform-origin:center;transition:transform .2s ease}
-.grid-table{display:flex;flex-direction:column;gap:6px}
-.grid-row{display:grid;grid-template-columns:24px repeat(5,var(--cell));gap:6px;align-items:center}
-.row-label{text-align:center;font-weight:800;font-size:1.1rem}
-.grid-cell{min-width:var(--cell);min-height:var(--cell);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-.cell-level{font-size:.95rem;font-weight:800}
-.grid-compact{display:flex;flex-direction:column;gap:10px;align-items:center}
-.compact-levels{display:grid;grid-template-columns:repeat(7,var(--cell));gap:8px;justify-content:center}
-.compact-levels .call-btn{font-size:1.3rem}
-.compact-hint{font-size:.85rem;color:var(--ink-dim);font-weight:600}
-.compact-strains{display:grid;grid-template-columns:repeat(5,var(--cell));gap:8px}
-.special-row{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:8px}
-.special-pass{font-size:1.05rem}
+/* ============================================================================
+   BIDDING SCREEN — reserved-band accessible layout
+   One reserved band per edge holds that seat's history strip; the grid lives in
+   the centre region between opposing bands and is capped to fit it even when
+   rotated, so grid and history can never collide at any size. Sizes use
+   container-query units relative to .bidding-area. See docs/AccessibilityMode.
+   ============================================================================ */
+.bidding-area{position:absolute;inset:0;container-type:size;
+  --bandEnd:clamp(80px,15cqh,150px);    /* reserved space at TOP and BOTTOM edges */
+  --bandSide:clamp(96px,15cqw,170px);   /* reserved space at LEFT and RIGHT edges */
+  --gap:10px;                           /* breathing gap between a band and the grid */
+  --fgGridOffset:clamp(80px,12cqmin,120px);
+}
 
-.seat-badge{background:var(--surface-2);border-radius:10px;padding:8px 14px;font-weight:700;text-align:center;color:var(--ink-dim);border:2px solid transparent;min-width:80px}
-.seat-badge--active{background:var(--accent);color:var(--accent-ink);border-color:var(--focus)}
-.seat-cue{display:block;font-size:.7rem;font-weight:600;margin-top:2px}
+/* shared grid button */
+.gb{background:var(--surface-2);border:2px solid transparent;border-radius:13px;color:var(--ink);font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .1s,background .12s;user-select:none;padding:0;line-height:1}
+.gb:active:not(:disabled){transform:scale(.96)}
+.gb:hover:not(:disabled):not(.special){background:var(--surface-3)}
+.gb.sel{border-color:var(--accent)}
+.gb.dim,.gb:disabled{opacity:.32;pointer-events:none}
+.gb.special{background:var(--accent);color:var(--accent-ink)}
+.gb.special:hover:not(:disabled){background:var(--accent);filter:brightness(1.06)}
+.gb .gb-nt{font-size:.62em}
 
-.auto-layout{position:absolute;inset:0}
-.auto-center{position:absolute;top:50%;left:50%;width:0;height:0}
-.seat-pos{position:absolute;width:0;height:0}
-/* Seat anchors scale with the viewport so the rotated bid strips stay clear of
-   the edges from a phone up to a large tablet. */
-.seat-pos--north{top:clamp(46px,8vmin,66px);left:50%}
-.seat-pos--south{bottom:clamp(60px,11vmin,90px);left:50%}
-.seat-pos--west{left:clamp(50px,11vmin,90px);top:50%}
-.seat-pos--east{right:clamp(50px,11vmin,90px);top:50%}
+/* ---- single-grid layouts (Compact / Full): seats pinned to edges, grid centred ----
+   Each seat band is a flex box exactly the size of its reserved band; the strip is
+   centred in it and rotated about its centre, so a rotated strip's on-screen
+   thickness stays within the band (it can never protrude into the grid region). */
+.single{position:absolute;inset:0}
+.single .seatpin{position:absolute;display:flex;align-items:center;justify-content:center}
+.single .seatpin .seat{flex:0 0 auto}
+.single .sp-n{top:0;left:0;right:0;height:var(--bandEnd)}
+.single .sp-s{bottom:0;left:0;right:0;height:var(--bandEnd)}
+.single .sp-w{left:0;top:0;bottom:0;width:var(--bandSide)}
+.single .sp-e{right:0;top:0;bottom:0;width:var(--bandSide)}
+.single .sp-n .seat{transform:rotate(180deg)}
+.single .sp-w .seat{transform:rotate(90deg)}
+.single .sp-e .seat{transform:rotate(-90deg)}
+/* fixed-shape block that ROTATES to face the bidder (angle set inline) */
+.gridblock{position:absolute;top:50%;left:50%;transform-origin:center center}
 
-.manual-layout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-.manual-controls{display:flex;align-items:center;gap:16px}
-.manual-hint{font-weight:700;font-size:1.1rem}
+/* COMPACT — two-row levels (4+3), suit row, Pass/X/XX */
+.compact{--gridMax:540px;
+  width:min(var(--gridMax),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)),calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)));
+  max-height:min(calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)));
+  display:flex;flex-direction:column;gap:2.2cqmin}
+.compact .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqmin}
+.compact .levels .gb{height:clamp(60px,12cqmin,104px);font-size:clamp(28px,6cqmin,48px)}
+.compact .suits{display:grid;grid-template-columns:repeat(5,1fr);gap:2cqmin}
+.compact .suits .gb{height:clamp(60px,12.5cqmin,108px);font-size:clamp(28px,6.2cqmin,50px)}
+.compact .passrow{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:2cqmin}
+.compact .passrow .gb{height:clamp(46px,8cqmin,64px);font-size:clamp(16px,2.6cqmin,22px)}
 
-.edges-layout{position:absolute;inset:0}
-.edges-center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-.edges-auction{display:flex;align-items:center;gap:12px;pointer-events:auto}
-.edge{position:absolute;transform-origin:center center}
-.edge-south{bottom:8px;left:50%;margin-left:-180px}
-.edge-north{top:8px;left:50%;margin-left:-180px}
-.edge-west{left:-140px;top:50%;margin-top:-180px}
-.edge-east{right:-140px;top:50%;margin-top:-180px}
-.edge-wait{display:grid;place-items:center;padding:20px}
+/* FULL — auto-scroll 7-row grid; pass row pinned below */
+.full{--gridMax:580px;
+  width:min(var(--gridMax),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)),calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)));
+  max-height:min(calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)));
+  display:flex;flex-direction:column;gap:1.4cqmin}
+.full .tagline{text-align:center;font-size:clamp(11px,1.6cqmin,14px);font-weight:700;color:var(--accent);flex:0 0 auto}
+.full .scrollwrap{flex:1 1 auto;min-height:110px;overflow-y:auto;border-radius:12px}
+.full .scrollwrap[data-anim="on"]{scroll-behavior:smooth}
+.full .grid{display:grid;grid-template-columns:clamp(34px,5cqmin,52px) repeat(5,1fr);gap:clamp(8px,1.4cqmin,12px)}
+.full .rowlabel{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink-dim);font-size:clamp(20px,3.4cqmin,28px);scroll-margin-top:4px}
+.full .grid .gb{height:clamp(48px,8.5cqmin,76px);font-size:clamp(22px,4.4cqmin,34px)}
+.full .passrow{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:clamp(8px,1.4cqmin,12px);flex:0 0 auto}
+.full .passrow .gb{height:clamp(44px,7cqmin,58px);font-size:clamp(16px,2.6cqmin,20px)}
 
-.auction-strip{background:var(--surface);border-radius:12px;padding:10px 12px;min-width:260px}
-.auction-head,.auction-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
-.auction-head{font-weight:800;color:var(--ink-dim);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px}
-.auction-cell{padding:3px 0;font-weight:700}
-.auction-empty{text-align:center;color:var(--ink-dim);padding:8px}
-.call-inline{display:inline-flex;align-items:center;gap:2px;font-weight:700}
+/* ---- seat history strip (Compact / Full) ---- */
+.seat{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid transparent;border-radius:18px;padding:10px 12px}
+.seat.active{border-color:var(--accent)}
+.seat .nm{font-weight:800;font-size:16px;text-align:center;line-height:1.05;flex:0 0 auto}
+.seat.active .nm{color:var(--accent)}
+.seat .nm .cue{display:block;font-size:11px;color:var(--accent);font-weight:700}
+.seat .cards{display:flex;gap:9px}
+.undo{width:50px;height:50px;border-radius:50%;border:2px solid var(--line);background:transparent;color:var(--ink);font-size:22px;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.undo:hover:not(:disabled){background:var(--surface-2);border-color:var(--surface-3)}
+.undo:disabled{opacity:.3;cursor:not-allowed}
+.undo--live{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
 
+/* ---- four grids: edge-pinned history (fixed) + edge-pinned grids (active grows) ---- */
+.fourwrap{position:absolute;inset:0}
+.fg-pos{position:absolute;transition:all .4s cubic-bezier(.4,0,.2,1)}
+.fgh-n{top:10px;left:50%;transform:translateX(-50%) rotate(180deg)}
+.fgh-s{bottom:10px;left:50%;transform:translateX(-50%)}
+.fgh-w{left:14px;top:50%;transform:translateY(-50%) rotate(90deg)}
+.fgh-e{right:14px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+.fgg-n{top:var(--fgGridOffset);left:50%;transform:translateX(-50%) rotate(180deg)}
+.fgg-s{bottom:var(--fgGridOffset);left:50%;transform:translateX(-50%)}
+.fgg-w{left:var(--fgGridOffset);top:50%;transform:translateY(-50%) rotate(90deg)}
+.fgg-e{right:var(--fgGridOffset);top:50%;transform:translateY(-50%) rotate(-90deg)}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;opacity:.55;transition:opacity .2s,padding .2s;width:min(260px,calc(100cqw - 2*var(--bandSide) - 4*var(--gap)));box-sizing:border-box}
+.mini.active{opacity:1;box-shadow:0 0 0 2px var(--accent);padding:14px;width:min(380px,calc(100cqw - 2*var(--bandSide) - 4*var(--gap)),calc((100cqh - 2*var(--bandEnd))*0.62),calc((100cqw - 2*var(--bandSide))*0.62))}
+.mini .nm{font-size:13px;font-weight:800;text-align:center;margin-bottom:7px}
+.mini .nm .cue{color:var(--accent);font-size:11px;margin-left:4px}
+.mini .lv{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:5px}
+.mini .lv .gb{height:clamp(26px,4.5cqmin,32px);font-size:clamp(13px,2.4cqmin,16px);border-radius:8px}
+.mini .su{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.mini .su .gb{height:clamp(26px,4.5cqmin,32px);font-size:clamp(13px,2.5cqmin,17px);border-radius:8px}
+.mini .spec{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:5px;margin-top:5px}
+.mini .spec .gb{height:clamp(24px,4cqmin,28px);font-size:clamp(11px,2cqmin,13px);border-radius:8px}
+.mini.active .nm{font-size:clamp(14px,2.6cqmin,17px);margin-bottom:11px}
+.mini.active .lv{gap:9px;margin-bottom:9px}
+.mini.active .lv .gb{height:clamp(40px,7cqmin,54px);font-size:clamp(20px,3.8cqmin,26px);border-radius:12px}
+.mini.active .su{gap:9px}
+.mini.active .su .gb{height:clamp(42px,7.2cqmin,56px);font-size:clamp(21px,4cqmin,28px);border-radius:12px}
+.mini.active .spec{gap:9px;margin-top:9px}
+.mini.active .spec .gb{height:clamp(36px,5.5cqmin,44px);font-size:clamp(14px,2.6cqmin,17px);border-radius:12px}
+.fg-hist{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.fg-hist .undo{width:42px;height:42px;font-size:18px}
+.fg-hist .nm2{font-size:12px;font-weight:800;color:var(--ink-dim)}
+.fg-hist .cards{display:flex;gap:7px}
+
+/* ---- mirrored-corner bid card (default = single-screen seat strips, large) ---- */
+.mc-card{position:relative;width:clamp(54px,7.5cqmin,78px);height:clamp(74px,10.2cqmin,106px);background:var(--surface-2);border:2px solid transparent;border-radius:13px;flex:0 0 auto}
+.mc-card--newest{border-color:var(--accent)}
+.mc-idx{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:.86;font-weight:800}
+.mc-idx .mc-lvl{font-size:clamp(16px,2.2cqmin,23px)}
+.mc-idx .mc-suit{font-size:clamp(14px,1.9cqmin,20px)}
+.mc-idx--tl{top:7px;left:8px}
+.mc-idx--br{bottom:7px;right:8px;transform:rotate(180deg)}
+.mc-centre{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(26px,3.5cqmin,36px);font-weight:800;line-height:1}
+.mc-centre--nt{font-size:clamp(20px,2.8cqmin,27px)}
+.mc-card--call .mc-word{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:800;color:var(--ink-dim)}
+.mc-card--call .mc-word--top{top:9px;transform:translateX(-50%) rotate(180deg)}
+.mc-card--call .mc-word--bot{bottom:9px}
+.mc-card--call .mc-word--mid{top:50%;transform:translate(-50%,-50%);font-size:17px;color:var(--ink)}
+.mc-empty{display:grid;place-items:center;width:clamp(54px,7.5cqmin,78px);height:clamp(74px,10.2cqmin,106px);border-radius:13px;background:rgba(0,0,0,.06);color:var(--ink-dim);opacity:.5;font-size:30px;flex:0 0 auto}
+/* mid-size card for the four-grids history strip */
+.fg-hist .mc-card{width:46px;height:62px;border-radius:9px}
+.fg-hist .mc-idx .mc-lvl{font-size:14px}
+.fg-hist .mc-idx .mc-suit{font-size:12px}
+.fg-hist .mc-idx--tl{top:4px;left:5px}
+.fg-hist .mc-idx--br{bottom:4px;right:5px}
+.fg-hist .mc-centre{font-size:22px}
+.fg-hist .mc-centre--nt{font-size:15px}
+.fg-hist .mc-card--call .mc-word--mid{font-size:14px}
+.fg-hist .mc-empty{width:46px;height:62px;border-radius:9px;font-size:18px}
+
+/* ---- mobile (compact only): smaller bands + cards so the centre grid stays usable ---- */
+[data-device="mobile"] .bidding-area{--bandSide:clamp(80px,24cqw,120px);--bandEnd:clamp(72px,16cqh,116px)}
+[data-device="mobile"] .seat{gap:8px;padding:8px 10px}
+[data-device="mobile"] .seat .nm{font-size:13px}
+[data-device="mobile"] .undo{width:42px;height:42px;font-size:18px}
+[data-device="mobile"] .mc-card{width:44px;height:60px}
+[data-device="mobile"] .mc-idx .mc-lvl{font-size:13px}
+[data-device="mobile"] .mc-idx .mc-suit{font-size:11px}
+[data-device="mobile"] .mc-centre{font-size:19px}
+[data-device="mobile"] .mc-centre--nt{font-size:14px}
+[data-device="mobile"] .mc-empty{width:44px;height:60px;font-size:22px}
+
+/* ===== Contract screen ===== */
 .contract-grid{position:absolute;inset:12px 12px 90px 12px;display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto 1fr auto;grid-template-areas:". north ." "west center east" ". south ."}
 .role{display:grid;place-items:center}
 .role--north{grid-area:north}.role--south{grid-area:south}
@@ -156,7 +228,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .fc-edge{position:absolute;display:flex;align-items:center;justify-content:center;gap:4px;font-size:1.7rem;font-weight:800;font-family:var(--font-display);line-height:1;left:50%;transform-origin:center}
 .fc-edge--top{top:14px;transform:translateX(-50%) rotate(180deg)}
 .fc-edge--bottom{bottom:14px;transform:translateX(-50%)}
-.fc-edge--left{left:6px;top:50%;left:auto;transform:translate(0,-50%) rotate(90deg)}
 .fc-edge--left{left:6px;top:50%;transform:translate(0,-50%) rotate(90deg)}
 .fc-edge--right{right:6px;top:50%;left:auto;transform:translate(0,-50%) rotate(-90deg)}
 .fc-dbl{font-size:1rem;color:var(--accent)}
@@ -168,6 +239,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .contract-decl{margin-top:4px;color:var(--ink-dim)}
 .contract-actions{position:absolute;left:0;right:0;bottom:16px;display:flex;gap:12px;justify-content:center;align-items:center}
 
+/* ===== Score screen ===== */
 .score-scroll{flex:1;overflow-y:auto;padding:12px 20px 24px;display:flex;flex-direction:column;align-items:center}
 .score-title{font-size:3rem;margin:8px 0 24px;text-align:center}
 .score-table{width:100%;max-width:760px;border-collapse:collapse;font-size:1rem}
@@ -175,7 +247,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .score-table td{padding:12px 8px;text-align:center;font-weight:600}
 .score-table tbody tr{border-bottom:1px solid var(--line)}
 .score-actions{margin-top:auto;padding-top:32px;display:flex;gap:12px;align-items:center}
-
 .score-split{flex:1;display:flex;flex-direction:column;min-height:0}
 .score-zone{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:10px 16px}
 .score-zone--top{transform:rotate(180deg)}
@@ -188,35 +259,11 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .score-panel .score-actions{padding-top:14px;margin-top:10px}
 .score-panel .score-actions .btn-primary{padding:9px 16px;font-size:.92rem;min-height:42px}
 .score-panel .score-actions .icon-btn{width:42px;height:42px}
+.score-row--click{cursor:pointer}
+.score-row--click:hover{background:var(--surface-2)}
+.row-hint{display:inline-block;font-size:.7rem;color:var(--accent);font-weight:700;margin-left:4px}
 
-.fg-grid{background:var(--surface);border-radius:16px;padding:12px 13px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:8px;align-items:center;opacity:.5}
-.fg-grid--active{opacity:1;box-shadow:0 8px 24px rgba(0,0,0,.25),0 0 0 2px var(--accent)}
-.fg-name{font-weight:800;font-size:.95rem}
-.fg-turn{display:block;font-size:.66rem;font-weight:700;color:var(--accent);text-align:center}
-.fg-levels{display:grid;grid-template-columns:repeat(7,38px);gap:5px}
-.fg-suits{display:grid;grid-template-columns:repeat(5,42px);gap:5px}
-.fg-cell{height:40px;border-radius:9px;font-size:1.1rem;font-weight:800;min-height:0;padding:0}
-.fg-spec{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:5px;width:100%}
-.fg-spec .call-btn{height:38px;min-height:0;font-size:.95rem;padding:0}
-.fg-back{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 18px;border-radius:18px;background:transparent;color:var(--ink);font-weight:700;font-size:.9rem;border:2px solid var(--line)}
-.fg-back:hover:not(:disabled){background:var(--surface-2);border-color:var(--surface-3)}
-.fg-back:disabled{opacity:.32;cursor:not-allowed}
-.fg-layout{--fg-scale:1}
-.fg-seat{position:absolute;display:flex;justify-content:center}
-.fg-seat-inner{transform-origin:center;transform:scale(var(--fg-scale))}
-.fg-seat--south{left:0;right:0;bottom:8px}
-.fg-seat--south .fg-seat-inner{transform:scale(var(--fg-scale));transform-origin:bottom center}
-.fg-seat--north{left:0;right:0;top:8px}
-.fg-seat--north .fg-seat-inner{transform:scale(var(--fg-scale)) rotate(180deg);transform-origin:center}
-.fg-seat--west{top:0;bottom:0;left:8px;flex-direction:column}
-.fg-seat--west .fg-seat-inner{transform:scale(var(--fg-scale)) rotate(90deg);transform-origin:center}
-.fg-seat--east{top:0;bottom:0;right:8px;flex-direction:column}
-.fg-seat--east .fg-seat-inner{transform:scale(var(--fg-scale)) rotate(270deg);transform-origin:center}
-.fg-seat--west,.fg-seat--east{align-items:center;justify-content:center}
-.fg-block{display:flex;flex-direction:column;align-items:center;gap:8px}
-.fg-bids{display:flex;align-items:center;gap:8px;min-height:46px;flex-wrap:wrap;justify-content:center;max-width:340px}
-.fgb-empty{color:var(--ink-dim);font-size:.95rem;font-weight:600}
-.fgb-more{color:var(--ink-dim);font-size:.95rem;font-weight:700}
+/* ===== Tricks screen ===== */
 .trick-split{flex:1;display:flex;flex-direction:column;min-height:0}
 .trick-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:14px}
 .trick-zone--top{transform:rotate(180deg)}
@@ -230,6 +277,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .trick-num{width:clamp(78px,16vmin,104px);height:clamp(78px,16vmin,104px);border-radius:18px;background:var(--surface-2);display:grid;place-items:center;font-size:clamp(2.4rem,7vmin,3.4rem);font-weight:800;font-family:var(--font-display)}
 .trick-actions{display:flex;gap:12px}
 
+/* ===== Bid History overlay ===== */
 .bh-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:60}
 .bh-modal{background:var(--bg);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:100%;max-width:460px;height:min(86%,640px);display:flex;flex-direction:column;overflow:hidden}
 .bh-zone{flex:1;min-height:0;display:flex;justify-content:center;overflow:hidden}
@@ -246,6 +294,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .bh-table td{padding:8px 6px;text-align:center;font-weight:700;border-bottom:1px solid var(--line);font-size:.92rem}
 .bh-empty{color:var(--ink-dim);font-weight:600}
 
+/* ===== Settings overlay ===== */
 .settings-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto;z-index:50}
 .settings-sheet{background:var(--bg);width:100%;max-width:720px;border-radius:18px;padding:16px 20px 28px}
 .settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -278,50 +327,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .row-flex{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .settings-actions{display:flex;gap:10px;flex-wrap:wrap}
 
-.bid-seat{display:flex;flex-direction:row;align-items:center;gap:10px;background:var(--surface);border-radius:16px;padding:10px 12px;border:2px solid transparent}
-.bid-seat--active{border-color:var(--accent)}
-.bc-head{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto}
-.bc-name{font-weight:800;font-size:1rem;text-align:center;line-height:1.05}
-.bc-turn{display:block;font-size:.68rem;font-weight:700;color:var(--accent)}
-.bid-seat--active .bc-name{color:var(--accent)}
-.bc-cards{display:flex;flex-direction:row;align-items:center;gap:8px}
-/* Mirrored-corner bid card — playing-card style: level+suit index in two opposite
-   corners (one rotated 180°) + a large centre glyph, so it reads from both long
-   sides of the table. See docs "Bid Card Design — Mirrored Corners". */
-.mc-card{position:relative;width:62px;height:86px;background:var(--surface-2);border:2px solid transparent;border-radius:11px;flex:0 0 auto}
-.mc-card--newest{border-color:var(--accent)}
-.mc-idx{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:.86;font-weight:800}
-.mc-idx .mc-lvl{font-size:18px}
-.mc-idx .mc-suit{font-size:15px}
-.mc-idx--tl{top:6px;left:7px}
-.mc-idx--br{bottom:6px;right:7px;transform:rotate(180deg)}
-.mc-centre{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:800;line-height:1}
-.mc-centre--nt{font-size:21px}
-.mc-card--call .mc-word{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:800;color:var(--ink-dim)}
-.mc-card--call .mc-word--top{top:9px;transform:translateX(-50%) rotate(180deg)}
-.mc-card--call .mc-word--bot{bottom:9px}
-.mc-card--call .mc-word--mid{top:50%;transform:translate(-50%,-50%);font-size:17px;color:var(--ink)}
-/* four-grids strips are smaller */
-.fg-bids .mc-card{width:52px;height:72px}
-.fg-bids .mc-idx .mc-lvl{font-size:15px}
-.fg-bids .mc-idx .mc-suit{font-size:13px}
-.fg-bids .mc-centre{font-size:22px}
-.fg-bids .mc-centre--nt{font-size:18px}
-.bc-more{color:var(--ink-dim);font-size:.85rem;font-weight:700;padding:0 4px}
-.bc-empty{color:var(--ink-dim);font-size:.95rem;padding:8px 14px;min-height:48px;display:grid;place-items:center}
-.bc-back{width:52px;height:52px;border-radius:50%;background:transparent;color:var(--ink);font-size:1.45rem;display:grid;place-items:center;flex:0 0 auto;border:2px solid var(--line)}
-.bc-back:hover:not(:disabled){background:var(--surface-2);border-color:var(--surface-3)}
-.bc-back:disabled{opacity:.3;cursor:not-allowed;border-color:var(--line);color:var(--ink-dim)}
-.bc-back--live{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
-.auction-head em{display:block;font-size:.6rem;font-weight:700;font-style:normal;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
-.auction-cell--filled{background:var(--surface-2);border-radius:7px}
-
-.grid-cell--suitonly{min-width:var(--cell);min-height:var(--cell)}
-
-.score-row--click{cursor:pointer}
-.score-row--click:hover{background:var(--surface-2)}
-.row-hint{display:inline-block;font-size:.7rem;color:var(--accent);font-weight:700;margin-left:4px}
-
+/* ===== mobile: contract + score tweaks ===== */
 [data-device="mobile"] .contract-grid{inset:64px 4px 84px 4px;grid-template-columns:64px 1fr 64px}
 [data-device="mobile"] .role--west{min-width:0;width:64px}
 [data-device="mobile"] .role--east{min-width:0;width:64px}
@@ -332,8 +338,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 [data-device="mobile"] .fourcard{width:150px;height:150px}
 [data-device="mobile"] .contract-actions{bottom:12px;gap:8px;flex-wrap:wrap;padding:0 8px}
 [data-device="mobile"] .contract-actions .btn-primary{padding:10px 16px;font-size:.92rem;min-height:46px}
-
-/* mobile score sheet: smaller cells so all six columns fit a phone width */
 [data-device="mobile"] .score-panel .score-title{font-size:1.35rem}
 [data-device="mobile"] .score-panel .score-table{font-size:.74rem}
 [data-device="mobile"] .score-panel .score-table th{padding:6px 3px}
@@ -347,31 +351,23 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 }
 
 /* ===== Accessibility (extra-large) mode =====
-   Scales text and controls up across all screens for low vision / limited
-   dexterity. The bidding grid grows via its measured fit transform (higher cap),
-   so its contents — including suit glyphs — scale together. */
-[data-accessible="true"]{--tap:clamp(56px,10vmin,84px);--cell:clamp(46px,9vmin,72px)}
+   Scales text and controls up across all screens. The bidding grid already fills
+   the centre band region; extra-large raises its size cap and enlarges the cards
+   so it grows further. */
+[data-accessible="true"]{--tap:clamp(56px,10vmin,84px)}
 [data-accessible="true"] .pill{font-size:1.05rem;padding:9px 15px}
 [data-accessible="true"] .icon-btn{font-size:1.8rem}
 [data-accessible="true"] .btn-primary{font-size:1.3rem;padding:16px 30px;min-height:64px}
-[data-accessible="true"] .compact-hint{font-size:1.25rem}
-[data-accessible="true"] .row-label{font-size:1.5rem}
-/* per-seat bid cards */
-[data-accessible="true"] .mc-card{width:70px;height:96px}
-[data-accessible="true"] .mc-idx .mc-lvl{font-size:24px}
-[data-accessible="true"] .mc-idx .mc-suit{font-size:20px}
-[data-accessible="true"] .mc-centre{font-size:36px}
-[data-accessible="true"] .mc-centre--nt{font-size:28px}
-[data-accessible="true"] .mc-card--call .mc-word{font-size:18px}
-[data-accessible="true"] .mc-card--call .mc-word--mid{font-size:24px}
-/* Pull the seat strips toward the edges so the centre grid has far more room to
-   grow (the grid is fit-to-available-space, so this is what actually enlarges it). */
-[data-accessible="true"] .seat-pos--north{top:clamp(36px,6vmin,54px)}
-[data-accessible="true"] .seat-pos--south{bottom:clamp(44px,8vmin,64px)}
-[data-accessible="true"] .seat-pos--west{left:clamp(36px,7vmin,64px)}
-[data-accessible="true"] .seat-pos--east{right:clamp(36px,7vmin,64px)}
-[data-accessible="true"] .bc-name{font-size:1.25rem}
-[data-accessible="true"] .bc-back{width:58px;height:58px;font-size:1.5rem}
+/* bidding: bigger grid cap + cards; slightly larger bands for readable history */
+[data-accessible="true"] .compact{--gridMax:760px}
+[data-accessible="true"] .full{--gridMax:800px}
+[data-accessible="true"] .mc-card{width:clamp(64px,9cqmin,98px);height:clamp(88px,12.4cqmin,134px)}
+[data-accessible="true"] .mc-idx .mc-lvl{font-size:clamp(20px,3cqmin,30px)}
+[data-accessible="true"] .mc-idx .mc-suit{font-size:clamp(17px,2.6cqmin,26px)}
+[data-accessible="true"] .mc-centre{font-size:clamp(32px,4.6cqmin,46px)}
+[data-accessible="true"] .mc-centre--nt{font-size:clamp(25px,3.6cqmin,36px)}
+[data-accessible="true"] .seat .nm{font-size:1.25rem}
+[data-accessible="true"] .undo{width:60px;height:60px;font-size:1.5rem}
 /* contract card + role badges */
 [data-accessible="true"] .fourcard{transform:scale(1.4)}
 [data-accessible="true"] .role-badge{padding:20px 28px}

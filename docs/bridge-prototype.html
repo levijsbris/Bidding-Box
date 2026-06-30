@@ -336,6 +336,125 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 [data-device="mobile"] .fourcard{width:150px;height:150px}
 [data-device="mobile"] .contract-actions{bottom:12px;gap:8px;flex-wrap:wrap;padding:0 8px}
 [data-device="mobile"] .contract-actions .btn-primary{padding:10px 16px;font-size:.92rem;min-height:46px}
+
+/* ===== NEW BIDDING SCREEN — reserved-band accessible layout (replaces the old
+   auto-layout / four-grids CSS above; those classes are now unused) ===== */
+.bidding-area{position:absolute;inset:0;container-type:size;
+  --bandEnd:clamp(80px,15cqh,150px);--bandSide:clamp(96px,15cqw,170px);--gap:10px;
+  --fgGridOffset:clamp(80px,12cqmin,120px)}
+.gb{background:var(--surface-2);border:2px solid transparent;border-radius:13px;color:var(--ink);font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .1s,background .12s;user-select:none;padding:0;line-height:1}
+.gb:active:not(:disabled){transform:scale(.96)}
+.gb:hover:not(:disabled):not(.special){background:var(--surface-3)}
+.gb.sel{border-color:var(--accent)}
+.gb.dim,.gb:disabled{opacity:.32;pointer-events:none}
+.gb.special{background:var(--accent);color:var(--accent-ink)}
+.gb.special:hover:not(:disabled){background:var(--accent);filter:brightness(1.06)}
+.gb .gb-nt{font-size:.62em}
+.single{position:absolute;inset:0}
+.single .seatpin{position:absolute;display:flex;align-items:center;justify-content:center}
+.single .seatpin .seat{flex:0 0 auto}
+.single .sp-n{top:0;left:0;right:0;height:var(--bandEnd)}
+.single .sp-s{bottom:0;left:0;right:0;height:var(--bandEnd)}
+.single .sp-w{left:0;top:0;bottom:0;width:var(--bandSide)}
+.single .sp-e{right:0;top:0;bottom:0;width:var(--bandSide)}
+.single .sp-n .seat{transform:rotate(180deg)}
+.single .sp-w .seat{transform:rotate(90deg)}
+.single .sp-e .seat{transform:rotate(-90deg)}
+.gridblock{position:absolute;top:50%;left:50%;transform-origin:center center}
+.gridblock.face-S{transform:translate(-50%,-50%) rotate(0deg)}
+.gridblock.face-W{transform:translate(-50%,-50%) rotate(90deg)}
+.gridblock.face-N{transform:translate(-50%,-50%) rotate(180deg)}
+.gridblock.face-E{transform:translate(-50%,-50%) rotate(270deg)}
+.compact{--gridMax:540px;width:min(var(--gridMax),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)),calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)));max-height:min(calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)));display:flex;flex-direction:column;gap:2.2cqmin}
+.compact .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqmin}
+.compact .levels .gb{height:clamp(60px,12cqmin,104px);font-size:clamp(28px,6cqmin,48px)}
+.compact .suits{display:grid;grid-template-columns:repeat(5,1fr);gap:2cqmin}
+.compact .suits .gb{height:clamp(60px,12.5cqmin,108px);font-size:clamp(28px,6.2cqmin,50px)}
+.compact .passrow{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:2cqmin}
+.compact .passrow .gb{height:clamp(46px,8cqmin,64px);font-size:clamp(16px,2.6cqmin,22px)}
+.full{--gridMax:580px;width:min(var(--gridMax),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)),calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)));max-height:min(calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)));display:flex;flex-direction:column;gap:1.4cqmin}
+.full .tagline{text-align:center;font-size:clamp(11px,1.6cqmin,14px);font-weight:700;color:var(--accent);flex:0 0 auto}
+.full .scrollwrap{flex:1 1 auto;min-height:110px;overflow-y:auto;border-radius:12px}
+.full .scrollwrap[data-anim="on"]{scroll-behavior:smooth}
+.full .grid{display:grid;grid-template-columns:clamp(34px,5cqmin,52px) repeat(5,1fr);gap:clamp(8px,1.4cqmin,12px)}
+.full .rowlabel{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink-dim);font-size:clamp(20px,3.4cqmin,28px);scroll-margin-top:4px}
+.full .grid .gb{height:clamp(48px,8.5cqmin,76px);font-size:clamp(22px,4.4cqmin,34px)}
+.full .passrow{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:clamp(8px,1.4cqmin,12px);flex:0 0 auto}
+.full .passrow .gb{height:clamp(44px,7cqmin,58px);font-size:clamp(16px,2.6cqmin,20px)}
+.seat{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid transparent;border-radius:18px;padding:10px 12px}
+.seat.active{border-color:var(--accent)}
+.seat .nm{font-weight:800;font-size:16px;text-align:center;line-height:1.05;flex:0 0 auto}
+.seat.active .nm{color:var(--accent)}
+.seat .nm .cue{display:block;font-size:11px;color:var(--accent);font-weight:700}
+.seat .cards{display:flex;gap:9px}
+.undo{width:50px;height:50px;border-radius:50%;border:2px solid var(--line);background:transparent;color:var(--ink);font-size:22px;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.undo:hover:not(:disabled){background:var(--surface-2);border-color:var(--surface-3)}
+.undo:disabled{opacity:.3;cursor:not-allowed}
+.undo--live{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
+.fourwrap{position:absolute;inset:0}
+.fg-pos{position:absolute;transition:all .4s cubic-bezier(.4,0,.2,1)}
+.fgh-n{top:10px;left:50%;transform:translateX(-50%) rotate(180deg)}
+.fgh-s{bottom:10px;left:50%;transform:translateX(-50%)}
+.fgh-w{left:14px;top:50%;transform:translateY(-50%) rotate(90deg)}
+.fgh-e{right:14px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+.fgg-n{top:var(--fgGridOffset);left:50%;transform:translateX(-50%) rotate(180deg)}
+.fgg-s{bottom:var(--fgGridOffset);left:50%;transform:translateX(-50%)}
+.fgg-w{left:var(--fgGridOffset);top:50%;transform:translateY(-50%) rotate(90deg)}
+.fgg-e{right:var(--fgGridOffset);top:50%;transform:translateY(-50%) rotate(-90deg)}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;opacity:.55;transition:opacity .2s,padding .2s;width:min(260px,calc(100cqw - 2*var(--bandSide) - 4*var(--gap)));box-sizing:border-box}
+.mini.active{opacity:1;box-shadow:0 0 0 2px var(--accent);padding:14px;width:min(380px,calc(100cqw - 2*var(--bandSide) - 4*var(--gap)),calc((100cqh - 2*var(--bandEnd))*0.62),calc((100cqw - 2*var(--bandSide))*0.62))}
+.mini .nm{font-size:13px;font-weight:800;text-align:center;margin-bottom:7px}
+.mini .nm .cue{color:var(--accent);font-size:11px;margin-left:4px}
+.mini .lv{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:5px}
+.mini .lv .gb{height:clamp(26px,4.5cqmin,32px);font-size:clamp(13px,2.4cqmin,16px);border-radius:8px}
+.mini .su{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.mini .su .gb{height:clamp(26px,4.5cqmin,32px);font-size:clamp(13px,2.5cqmin,17px);border-radius:8px}
+.mini .spec{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:5px;margin-top:5px}
+.mini .spec .gb{height:clamp(24px,4cqmin,28px);font-size:clamp(11px,2cqmin,13px);border-radius:8px}
+.mini.active .nm{font-size:clamp(14px,2.6cqmin,17px);margin-bottom:11px}
+.mini.active .lv{gap:9px;margin-bottom:9px}
+.mini.active .lv .gb{height:clamp(40px,7cqmin,54px);font-size:clamp(20px,3.8cqmin,26px);border-radius:12px}
+.mini.active .su{gap:9px}
+.mini.active .su .gb{height:clamp(42px,7.2cqmin,56px);font-size:clamp(21px,4cqmin,28px);border-radius:12px}
+.mini.active .spec{gap:9px;margin-top:9px}
+.mini.active .spec .gb{height:clamp(36px,5.5cqmin,44px);font-size:clamp(14px,2.6cqmin,17px);border-radius:12px}
+.fg-hist{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.fg-hist .undo{width:42px;height:42px;font-size:18px}
+.fg-hist .nm2{font-size:12px;font-weight:800;color:var(--ink-dim)}
+.fg-hist .cards{display:flex;gap:7px}
+.mc-card{position:relative;width:clamp(54px,7.5cqmin,78px);height:clamp(74px,10.2cqmin,106px);background:var(--surface-2);border:2px solid transparent;border-radius:13px;flex:0 0 auto}
+.mc-card--newest{border-color:var(--accent)}
+.mc-idx{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:.86;font-weight:800}
+.mc-idx .mc-lvl{font-size:clamp(16px,2.2cqmin,23px)}
+.mc-idx .mc-suit{font-size:clamp(14px,1.9cqmin,20px)}
+.mc-idx--tl{top:7px;left:8px}
+.mc-idx--br{bottom:7px;right:8px;transform:rotate(180deg)}
+.mc-centre{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(26px,3.5cqmin,36px);font-weight:800;line-height:1}
+.mc-centre--nt{font-size:clamp(20px,2.8cqmin,27px)}
+.mc-card--call .mc-word{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:800;color:var(--ink-dim)}
+.mc-card--call .mc-word--top{top:9px;transform:translateX(-50%) rotate(180deg)}
+.mc-card--call .mc-word--bot{bottom:9px}
+.mc-card--call .mc-word--mid{top:50%;transform:translate(-50%,-50%);font-size:17px;color:var(--ink)}
+.mc-empty{display:grid;place-items:center;width:clamp(54px,7.5cqmin,78px);height:clamp(74px,10.2cqmin,106px);border-radius:13px;background:rgba(0,0,0,.06);color:var(--ink-dim);opacity:.5;font-size:30px;flex:0 0 auto}
+.fg-hist .mc-card{width:46px;height:62px;border-radius:9px}
+.fg-hist .mc-idx .mc-lvl{font-size:14px}
+.fg-hist .mc-idx .mc-suit{font-size:12px}
+.fg-hist .mc-idx--tl{top:4px;left:5px}
+.fg-hist .mc-idx--br{bottom:4px;right:5px}
+.fg-hist .mc-centre{font-size:22px}
+.fg-hist .mc-centre--nt{font-size:15px}
+.fg-hist .mc-card--call .mc-word--mid{font-size:14px}
+.fg-hist .mc-empty{width:46px;height:62px;border-radius:9px;font-size:18px}
+[data-device="mobile"] .bidding-area{--bandSide:clamp(80px,24cqw,120px);--bandEnd:clamp(72px,16cqh,116px)}
+[data-device="mobile"] .seat{gap:8px;padding:8px 10px}
+[data-device="mobile"] .seat .nm{font-size:13px}
+[data-device="mobile"] .undo{width:42px;height:42px;font-size:18px}
+[data-device="mobile"] .mc-card{width:44px;height:60px}
+[data-device="mobile"] .mc-idx .mc-lvl{font-size:13px}
+[data-device="mobile"] .mc-idx .mc-suit{font-size:11px}
+[data-device="mobile"] .mc-centre{font-size:19px}
+[data-device="mobile"] .mc-centre--nt{font-size:14px}
+[data-device="mobile"] .mc-empty{width:44px;height:60px;font-size:22px}
 </style>
 </head>
 <body>
@@ -576,95 +695,82 @@ function callLabel(call){
   return `<span class="call-inline">${call.level}${suitHTML(call.strain,16)}</span>`;
 }
 
-function biddingGridHTML(){
-  const last=lastContractBid(S.bids);
-  const legal=c=>isLegalCall(c,S.dealer,S.bids);
-  let inner='';
-  if(S.gridStyle==='table'){
-    inner+=`<div class="grid-table">`;
-    for(const lvl of LEVELS){
-      inner+=`<div class="grid-row"><span class="row-label">${lvl}</span>`;
-      for(const s of STRAINS){
-        const ok=legal({kind:'bid',level:lvl,strain:s});
-        const sel=last&&last.level===lvl&&last.strain===s;
-        inner+=`<button class="call-btn grid-cell grid-cell--suitonly ${sel?'call-btn--selected':''}" ${ok?'':'disabled'} data-bid="${lvl}${s}" aria-label="${lvl} ${STRAIN_LABEL[s]}">${suitHTML(s,30)}</button>`;
-      }
-      inner+=`</div>`;
-    }
-    inner+=`</div>`;
-  } else {
-    inner+=`<div class="grid-compact"><div class="compact-levels">`;
-    for(const lvl of LEVELS){
-      const any=STRAINS.some(s=>legal({kind:'bid',level:lvl,strain:s}));
-      const sel=S.compactLevel===lvl;
-      inner+=`<button class="call-btn grid-cell ${sel?'call-btn--selected':''}" ${any?'':'disabled'} data-clevel="${lvl}">${lvl}</button>`;
-    }
-    inner+=`</div><div class="compact-hint">${S.compactLevel?`Level ${S.compactLevel} \u2014 pick a suit`:'Pick a level'}</div><div class="compact-strains">`;
-    for(const s of STRAINS){
-      const ok=S.compactLevel?legal({kind:'bid',level:S.compactLevel,strain:s}):false;
-      inner+=`<button class="call-btn grid-cell" ${ok?'':'disabled'} data-cstrain="${s}" aria-label="${STRAIN_LABEL[s]}">${suitHTML(s,22)}</button>`;
-    }
-    inner+=`</div></div>`;
-  }
-  const dOk=legal({kind:'double'}), rOk=legal({kind:'redouble'});
-  inner+=`<div class="special-row">
-    <button class="call-btn call-btn--special special-pass" data-special="pass">Pass</button>
-    <button class="call-btn call-btn--special" ${dOk?'':'disabled'} data-special="double" aria-label="Double">X</button>
-    <button class="call-btn call-btn--special" ${rOk?'':'disabled'} data-special="redouble" aria-label="Redouble">XX</button>
-  </div>`;
-  return `<div class="grid-wrap">${inner}</div>`;
-}
-
+// kept: rotateWrap is still used by the Contract screen role badges
 function rotateWrap(facing,inner,enabled=true){
   const angle=enabled?SEAT_ANGLE[facing]:0;
   const trans=S.animations?'transform .55s cubic-bezier(.4,0,.2,1)':'none';
-  // outer span has zero footprint; inner is absolutely centred and rotated,
-  // so a wide pre-rotation strip doesn't push the layout off-screen when sideways.
   return `<span style="position:relative;display:inline-block;width:0;height:0"><span style="position:absolute;left:0;top:0;transform:translate(-50%,-50%) rotate(${angle}deg);transition:${trans};transform-origin:center center;display:inline-flex;white-space:nowrap">${inner}</span></span>`;
 }
-function seatBadge(seat,active){
-  return `<div class="seat-badge ${active?'seat-badge--active':''}">${seat}${active?'<span class="seat-cue">to bid</span>':''}</div>`;
+
+// suit glyph for grid buttons (sized by the button's font; button carries aria-label)
+function gbSuit(strain){
+  if(strain==='NT') return '<span class="gb-nt">NT</span>';
+  return `<span class="${isRed(strain)?'suit-red':'suit-black'}">${STRAIN_SYMBOL[strain]}</span>`;
 }
 
-function seatCard(seat,turn){
-  const side = (seat==='East'||seat==='West');
-  const active=turn===seat;
-  // mobile: cap visible bids so rotated side strips fit on a phone; all seats keep the same card size
-  let limit;
-  if(S.deviceMobile){ limit = side ? 2 : 3; }
-  else { limit = side ? 4 : 6; }
-  const all=S.bids.filter(b=>b.seat===seat);
-  const mine=all.slice(-limit);
-  const more = all.length>limit ? all.length-limit : 0;
-  const lastBidder = S.bids.length ? S.bids[S.bids.length-1].seat : null;
-  const isLastBidder = lastBidder===seat;
-  const canUndo=S.bids.length>0;
-  let cardsHTML='';
-  if(mine.length===0){
-    cardsHTML=`<div class="bc-empty">\u2014</div>`;
-  } else {
-    cardsHTML=(more?`<span class="bc-more">+${more}</span>`:'')+mine.map((b,i)=>{
-      const isNewest = isLastBidder && i===mine.length-1;
-      return `<span class="bc-card ${isNewest?'bc-card--newest':''}">${bigCallLabel(b.call)}</span>`;
-    }).join('');
+// Mirrored-corner bid card (playing-card style): index in two opposite corners
+// (one rotated 180) + a large centre glyph, so it reads from both long sides.
+function mcCard(call,newest){
+  const nw=newest?' mc-card--newest':'';
+  if(call.kind!=='bid'){
+    const w=call.kind==='pass'?'Pass':call.kind==='double'?'X':'XX';
+    const aria=call.kind==='pass'?'Pass':call.kind==='double'?'Double':'Redouble';
+    return `<span class="mc-card mc-card--call${nw}" role="img" aria-label="${aria}"><span class="mc-word mc-word--top" aria-hidden="true">${w}</span><span class="mc-word mc-word--mid" aria-hidden="true">${w}</span><span class="mc-word mc-word--bot" aria-hidden="true">${w}</span></span>`;
   }
-  // horizontal strip: name + arrow fixed at the player's left end, cards grow rightward (toward table centre)
-  return `<div class="bid-seat ${active?'bid-seat--active':''}">
-      <div class="bc-head">
-        <button class="bc-back ${isLastBidder?'bc-back--live':''}" ${canUndo?'':'disabled'} data-act="undo" aria-label="Undo last bid (${seat})">&#8634;</button>
-        <div class="bc-name">${seat}${active?'<span class="bc-turn">to bid</span>':''}</div>
-      </div>
-      <div class="bc-cards">${cardsHTML}</div>
-    </div>`;
+  const isNT=call.strain==='NT', cc=isRed(call.strain)?'suit-red':'suit-black';
+  const idx=`<span class="mc-lvl">${call.level}</span><span class="mc-suit ${cc}">${isNT?'NT':STRAIN_SYMBOL[call.strain]}</span>`;
+  const ctr=isNT?`<span class="mc-centre mc-centre--nt">${call.level}NT</span>`:`<span class="mc-centre ${cc}">${STRAIN_SYMBOL[call.strain]}</span>`;
+  return `<span class="mc-card${nw}" role="img" aria-label="${call.level} ${STRAIN_LABEL[call.strain]}"><span class="mc-idx mc-idx--tl" aria-hidden="true">${idx}</span>${ctr}<span class="mc-idx mc-idx--br" aria-hidden="true">${idx}</span></span>`;
 }
 
-// larger bid card label: level on top, suit below (like the physical cards)
-function bigCallLabel(call){
-  if(call.kind==='pass') return `<span class="bc-word">Pass</span>`;
-  if(call.kind==='double') return `<span class="bc-word">X</span>`;
-  if(call.kind==='redouble') return `<span class="bc-word">XX</span>`;
-  return `<span class="bc-bid"><span class="bc-lvl">${call.level}</span>${suitHTML(call.strain,24)}</span>`;
+// seat history strip (compact/full)
+function seatStrip(seat,turn,limit){
+  const active=turn===seat;
+  const mine=S.bids.filter(b=>b.seat===seat).slice(-limit);
+  const lastBidder=S.bids.length?S.bids[S.bids.length-1].seat:null;
+  const isLast=lastBidder===seat, canUndo=S.bids.length>0;
+  const cards=mine.length===0?`<span class="mc-empty" aria-hidden="true">\u2014</span>`
+    :mine.map((b,i)=>mcCard(b.call,isLast&&i===mine.length-1)).join('');
+  return `<div class="seat${active?' active':''}"><button class="undo${isLast?' undo--live':''}" ${canUndo?'':'disabled'} data-act="undo" aria-label="Undo last bid (${seat})">&#8634;</button><div class="nm">${seat}${active?'<span class="cue">to bid</span>':''}</div><div class="cards">${cards}</div></div>`;
 }
+
+function specialRow(){
+  const legal=c=>isLegalCall(c,S.dealer,S.bids);
+  const dOk=legal({kind:'double'}), rOk=legal({kind:'redouble'});
+  return `<div class="passrow"><button class="gb special" data-special="pass" aria-label="Pass">Pass</button><button class="gb special ${dOk?'':'dim'}" ${dOk?'':'disabled'} data-special="double" aria-label="Double">X</button><button class="gb special ${rOk?'':'dim'}" ${rOk?'':'disabled'} data-special="redouble" aria-label="Redouble">XX</button></div>`;
+}
+
+// COMPACT \u2014 two-row levels (4+3), suit row, Pass/X/XX (no hint)
+function compactGrid(){
+  const legal=c=>isLegalCall(c,S.dealer,S.bids);
+  let lv='';
+  for(const lvl of LEVELS){
+    const any=STRAINS.some(s=>legal({kind:'bid',level:lvl,strain:s}));
+    lv+=`<button class="gb ${S.compactLevel===lvl?'sel':''} ${any?'':'dim'}" ${any?'':'disabled'} data-clevel="${lvl}" aria-label="Level ${lvl}">${lvl}</button>`;
+  }
+  let su='';
+  for(const s of STRAINS){
+    const ok=S.compactLevel?legal({kind:'bid',level:S.compactLevel,strain:s}):false;
+    su+=`<button class="gb ${s==='NT'?'nt':''} ${ok?'':'dim'}" ${ok?'':'disabled'} data-cstrain="${s}" aria-label="${STRAIN_LABEL[s]}">${gbSuit(s)}</button>`;
+  }
+  return `<div class="compact"><div class="levels">${lv}</div><div class="suits">${su}</div>${specialRow()}</div>`;
+}
+
+// FULL \u2014 auto-scroll 7-row grid; pass row pinned below
+function fullGrid(){
+  const legal=c=>isLegalCall(c,S.dealer,S.bids);
+  let rows='';
+  for(const L of LEVELS){
+    rows+=`<div class="rowlabel" id="lv-${L}">${L}</div>`;
+    for(const s of STRAINS){
+      const ok=legal({kind:'bid',level:L,strain:s});
+      rows+=`<button class="gb ${s==='NT'?'nt':''} ${ok?'':'dim'}" ${ok?'':'disabled'} data-bid="${L}${s}" aria-label="${L} ${STRAIN_LABEL[s]}">${gbSuit(s)}</button>`;
+    }
+  }
+  return `<div class="full"><div class="tagline">auto-scrolls after each bid</div><div class="scrollwrap" id="scrollwrap" data-anim="${S.animations?'on':'off'}"><div class="grid">${rows}</div></div>${specialRow()}</div>`;
+}
+
+const FACE={South:'face-S',West:'face-W',North:'face-N',East:'face-E'};
 
 function biddingScreen(){
   const turn=seatToBid(S.dealer,S.bids);
@@ -673,80 +779,54 @@ function biddingScreen(){
   if(S.biddingLayout==='fourGrids'){
     body=fourGridsBody(turn);
   } else {
-    const gridBlock=`<div style="display:flex;flex-direction:column;align-items:center;gap:10px">${biddingGridHTML()}</div>`;
-    body=`<div class="auto-layout">
-      <div class="auto-center">${rotateWrap(turn,gridBlock)}</div>
-      <div class="seat-pos seat-pos--north">${rotateWrap('North',seatCard('North',turn))}</div>
-      <div class="seat-pos seat-pos--south">${rotateWrap('South',seatCard('South',turn))}</div>
-      <div class="seat-pos seat-pos--west">${rotateWrap('West',seatCard('West',turn))}</div>
-      <div class="seat-pos seat-pos--east">${rotateWrap('East',seatCard('East',turn))}</div>
+    const grid=S.gridStyle==='table'?fullGrid():compactGrid();
+    const trans=S.animations?'transition:transform .45s cubic-bezier(.4,0,.2,1)':'transition:none';
+    body=`<div class="single">
+      <div class="seatpin sp-n">${seatStrip('North',turn,3)}</div>
+      <div class="seatpin sp-w">${seatStrip('West',turn,2)}</div>
+      <div class="seatpin sp-e">${seatStrip('East',turn,2)}</div>
+      <div class="seatpin sp-s">${seatStrip('South',turn,4)}</div>
+      <div class="gridblock ${FACE[turn]||'face-S'}" style="${trans}">${grid}</div>
     </div>`;
   }
-  return `<div class="app-shell">${topBar(label)}<div class="screen-body">${body}</div></div>`;
+  return `<div class="app-shell">${topBar(label)}<div class="screen-body"><div class="bidding-area">${body}</div></div></div>`;
 }
 
-// FOUR GRIDS: a compact grid permanently at each edge, facing its player.
-// Only the active player's grid is enabled; the others are shown dimmed.
-// Each grid has a strip of that seat's bid cards above it; the centre shows a
-// dual-readable auction summary (so both long sides can follow without rotating).
+// FOUR GRIDS \u2014 history strips pinned at the edge (fixed); grids pinned inboard
+// (active grows toward the centre); two independent layers, nothing rotates.
 function fourGridsBody(turn){
-  return `<div class="auto-layout fg-layout" id="fg-layout">
-    <div class="fg-seat fg-seat--north"><div class="fg-seat-inner">${fgSeatBlock('North',turn)}</div></div>
-    <div class="fg-seat fg-seat--south"><div class="fg-seat-inner">${fgSeatBlock('South',turn)}</div></div>
-    <div class="fg-seat fg-seat--west"><div class="fg-seat-inner">${fgSeatBlock('West',turn)}</div></div>
-    <div class="fg-seat fg-seat--east"><div class="fg-seat-inner">${fgSeatBlock('East',turn)}</div></div>
-  </div>`;
+  const H={North:'fgh-n',East:'fgh-e',South:'fgh-s',West:'fgh-w'};
+  const G={North:'fgg-n',East:'fgg-e',South:'fgg-s',West:'fgg-w'};
+  let out='';
+  for(const seat of SEATS){
+    out+=`<div class="fg-pos ${H[seat]}">${fgHist(seat)}</div>`;
+    out+=`<div class="fg-pos ${G[seat]}">${fgGrid(seat,seat===turn)}</div>`;
+  }
+  return `<div class="fourwrap">${out}</div>`;
 }
-
-// a seat's bid-card strip stacked above its input grid
-function fgSeatBlock(seat,turn){
-  const mine=S.bids.filter(b=>b.seat===seat);
-  const shown=mine.slice(-5);
-  const more=mine.length>5?mine.length-5:0;
-  let cards;
-  if(shown.length===0){ cards=`<span class="fgb-empty">no bids yet</span>`; }
-  else { cards=(more?`<span class="fgb-more">+${more}</span>`:'')+shown.map(b=>`<span class="fgb-card">${fgBidLabel(b.call)}</span>`).join(''); }
-  return `<div class="fg-block"><div class="fg-bids">${cards}</div>${miniGridFor(seat,turn)}</div>`;
+function fgHist(seat){
+  const mine=S.bids.filter(b=>b.seat===seat).slice(-3);
+  const lastBidder=S.bids.length?S.bids[S.bids.length-1].seat:null;
+  const isLast=lastBidder===seat, canUndo=S.bids.length>0;
+  const cards=mine.length===0?`<span class="mc-empty" aria-hidden="true">\u2014</span>`
+    :mine.map((b,i)=>mcCard(b.call,isLast&&i===mine.length-1)).join('');
+  return `<div class="fg-hist"><button class="undo${isLast?' undo--live':''}" ${canUndo?'':'disabled'} data-act="undo" aria-label="Undo last bid (${seat})">&#8634;</button><div class="nm2">${seat}</div><div class="cards">${cards}</div></div>`;
 }
-function fgBidLabel(call){
-  if(call.kind==='pass') return 'P';
-  if(call.kind==='double') return 'X';
-  if(call.kind==='redouble') return 'XX';
-  return `${call.level}${suitHTML(call.strain,22)}`;
-}
-
-// A compact grid for one seat. Enabled only when it's that seat's turn.
-function miniGridFor(seat,turn){
-  const active=seat===turn;
-  const last=lastContractBid(S.bids);
+function fgGrid(seat,active){
   const legal=c=>isLegalCall(c,S.dealer,S.bids);
-  const canUndo=S.bids.length>0;
-  // compact: a level row, suit row, special row
   let lv='';
   for(const lvl of LEVELS){
     const any=STRAINS.some(s=>legal({kind:'bid',level:lvl,strain:s}));
-    const sel=active&&S.compactLevel===lvl;
-    lv+=`<button class="call-btn fg-cell ${sel?'call-btn--selected':''}" ${active&&any?'':'disabled'} ${active?`data-clevel="${lvl}"`:''}>${lvl}</button>`;
+    lv+=`<button class="gb ${active&&S.compactLevel===lvl?'sel':''} ${active&&any?'':'dim'}" ${active&&any?'':'disabled'} ${active?`data-clevel="${lvl}"`:''} aria-label="Level ${lvl}">${lvl}</button>`;
   }
   let su='';
   for(const s of STRAINS){
     const ok=active&&S.compactLevel?legal({kind:'bid',level:S.compactLevel,strain:s}):false;
-    su+=`<button class="call-btn fg-cell" ${ok?'':'disabled'} ${active?`data-cstrain="${s}"`:''} aria-label="${STRAIN_LABEL[s]}">${suitHTML(s,18)}</button>`;
+    su+=`<button class="gb ${s==='NT'?'nt':''} ${ok?'':'dim'}" ${ok?'':'disabled'} ${active?`data-cstrain="${s}"`:''} aria-label="${STRAIN_LABEL[s]}">${gbSuit(s)}</button>`;
   }
   const dOk=active&&legal({kind:'double'}), rOk=active&&legal({kind:'redouble'});
-  const spec=`<div class="fg-spec">
-    <button class="call-btn call-btn--special" ${active?'':'disabled'} ${active?'data-special="pass"':''}>Pass</button>
-    <button class="call-btn call-btn--special" ${dOk?'':'disabled'} ${active?'data-special="double"':''}>X</button>
-    <button class="call-btn call-btn--special" ${rOk?'':'disabled'} ${active?'data-special="redouble"':''}>XX</button>
-  </div>`;
-  const backBtn = active ? `<button class="fg-back" ${canUndo?'':'disabled'} data-act="undo" aria-label="Undo last bid">&#8634; Back</button>` : '';
-  return `<div class="fg-grid ${active?'fg-grid--active':''}">
-    <div class="fg-name">${seat}${active?'<span class="fg-turn">your turn</span>':''}</div>
-    <div class="fg-levels">${lv}</div>
-    <div class="fg-suits">${su}</div>
-    ${spec}
-    ${backBtn}
-  </div>`;
+  const spec=`<div class="spec"><button class="gb special" ${active?'':'disabled'} ${active?'data-special="pass"':''} aria-label="Pass">Pass</button><button class="gb special ${dOk?'':'dim'}" ${dOk?'':'disabled'} ${active?'data-special="double"':''} aria-label="Double">X</button><button class="gb special ${rOk?'':'dim'}" ${rOk?'':'disabled'} ${active?'data-special="redouble"':''} aria-label="Redouble">XX</button></div>`;
+  return `<div class="mini${active?' active':''}"><div class="nm">${seat}${active?'<span class="cue">your turn</span>':''}</div><div class="lv">${lv}</div><div class="su">${su}</div>${spec}</div>`;
 }
 
 function newGameScreen(){
@@ -976,38 +1056,20 @@ function render(){
   if(S.settingsOpen) html+=settingsPanel();
   if(S.historyBoard!=null) html+=historyModal();
   app.innerHTML=html;
-  // after paint, fit the four-grids cluster to the available space
-  if(S.screen==='bidding' && S.biddingLayout==='fourGrids'){
-    requestAnimationFrame(fitFourGrids);
+  // after paint: auto-scroll the Full grid to the lowest still-legal level
+  if(S.screen==='bidding' && S.biddingLayout!=='fourGrids' && S.gridStyle==='table'){
+    requestAnimationFrame(autoScrollFull);
   }
 }
 
-// Measure the edge blocks at scale 1 and shrink the cluster uniformly so the two
-// vertical (N/S) blocks fit the height and the two horizontal-on-screen (E/W) blocks
-// fit the width, with a small margin. Keeps every grid fully on-screen at any size.
-function fitFourGrids(){
-  const layout=document.getElementById('fg-layout');
-  if(!layout) return;
-  layout.style.setProperty('--fg-scale','1');
-  const avH=layout.clientHeight, avW=layout.clientWidth;
-  if(!avH||!avW) return;
-  const inners=layout.querySelectorAll('.fg-seat-inner');
-  let blockH=0, blockW=0;
-  inners.forEach(n=>{
-    if(n.offsetHeight>blockH) blockH=n.offsetHeight;
-    if(n.offsetWidth>blockW) blockW=n.offsetWidth;
-  });
-  const margin=20;
-  // N/S stacked vertically: their HEIGHT consumes vertical space (two of them)
-  // E/W rotated 90deg: their HEIGHT consumes horizontal space (two of them)
-  // E/W rotated: their WIDTH consumes vertical space (must fit height alongside N/S)
-  // N/S: their WIDTH consumes horizontal space (must fit width)
-  const vScale=(avH-margin)/(blockH*2);      // N over S
-  const hScale=(avW-margin)/(blockH*2);      // W beside E
-  const ewVfit=(avH-margin)/blockW;          // rotated E/W height (=width) within view height
-  const nsHfit=(avW-margin)/blockW;          // N/S width within view width
-  const scale=Math.min(1, vScale, hScale, ewVfit, nsHfit);
-  layout.style.setProperty('--fg-scale', scale.toFixed(3));
+// Full grid: scroll so the lowest still-legal level row sits at the top.
+function autoScrollFull(){
+  const wrap=document.getElementById('scrollwrap');
+  if(!wrap) return;
+  const last=lastContractBid(S.bids);
+  const level=last?last.level:1;
+  const row=document.getElementById('lv-'+level);
+  if(row) wrap.scrollTo({top:row.offsetTop, behavior:S.animations?'smooth':'auto'});
 }
 
 // ============ EVENT DELEGATION ============
@@ -1072,18 +1134,7 @@ document.addEventListener('click',e=>{ if(e.target.closest('[data-stop]')&&!e.ta
 
 // init
 if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) S.animations=false;
-// keep the four-grids cluster fitted when the viewport changes
-let _fgResizeTimer=null;
-window.addEventListener('resize',()=>{
-  if(S.screen==='bidding' && S.biddingLayout==='fourGrids'){
-    clearTimeout(_fgResizeTimer);
-    _fgResizeTimer=setTimeout(fitFourGrids,80);
-  }
-});
-// re-fit once web fonts settle (they change block sizes after first paint)
-if(document.fonts && document.fonts.ready){
-  document.fonts.ready.then(()=>{ if(S.screen==='bidding' && S.biddingLayout==='fourGrids') fitFourGrids(); });
-}
+// the reserved-band layout is pure-CSS responsive (container queries); no JS fitting needed
 render();
 
 </script>

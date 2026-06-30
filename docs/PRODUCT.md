@@ -101,9 +101,9 @@ flowchart TD
     Mode --> Compact[Compact]
     Mode --> Four[Four grids]
 
-    Full --> FR[7x5 grid, rotates to face the active bidder]
-    Compact --> CR[Level-then-suit picker, rotates to face the active bidder]
-    Four --> FE[A fixed grid at each edge, no rotation ever]
+    Full --> FR[Auto-scroll 7-row grid, rotates to face the active bidder]
+    Compact --> CR[Two-row level picker then suit, rotates to face the active bidder]
+    Four --> FE[A grid at each edge, active grows in place, no rotation ever]
 
     FR --> Vert[Motion: rotates between turns]
     CR --> Vert
@@ -112,13 +112,13 @@ flowchart TD
 
 | Mode | How it works | Best for |
 |---|---|---|
-| **Full grid** | A complete 7×5 bidding grid that rotates to face the player whose turn it is. | Tablet/desktop, players who want every call visible at once. |
-| **Compact** | A smaller two-step picker (choose level, then suit) that rotates to the active bidder. The only mode that fits a phone. | Phones, smaller screens. |
-| **Four grids** | A fixed compact grid permanently at each of the four edges, each facing its player. Only the active player's grid is lit; the others dim. **Nothing rotates.** | Players with vertigo or motion sensitivity; fastest multi-player flow. |
+| **Full grid** | An auto-scrolling 7-row grid (each row: level + the five strains as one-tap cells); after each bid it scrolls to the lowest still-legal level. Rotates to face the player whose turn it is. | Tablet/desktop, players who want one-tap bids. |
+| **Compact** | A two-row level picker (1–4 / 5–7) then a suit row, plus Pass/X/XX, rotating to the active bidder. The only mode that fits a phone. | Phones, smaller screens, large targets. |
+| **Four grids** | A grid pinned at each of the four edges, each facing its player. Only the active player's grid is lit (the others dim) and it **grows in place at its own edge**; **nothing rotates.** | Players with vertigo or motion sensitivity; fastest multi-player flow. |
 
-In **Four grids** mode the layout is edge-pinned and auto-scales to fit the screen, so all four grids stay fully on-screen from a large tablet down to a phone, and no block is ever clipped as content grows. Each seat also shows its own bid-card strip, large enough to read across the table.
+These layouts use a **reserved-band system**: each edge reserves a band for that seat's bid-history strip, and the grid is sized to the centre region between the opposing bands — so the grid and the seat strips can **never overlap at any screen size** (verified from a large tablet down to a phone). In Four grids, the history strips are pinned at the very edge and the grids inboard, so a growing active grid expands toward the centre and never pushes the history.
 
-**Responsive by default.** The app adapts to the actual screen size — resizing the window or switching device reflows the layout automatically (only Compact is offered on a phone). The auto-rotate centre panel and the four-grids cluster scale to fill the available space without clipping. The rotating centre panel always turns the **shorter way** as play moves clockwise, so it never does a disorienting full spin, and South stays upright.
+**Responsive by default.** The app adapts to the actual screen size — resizing the window or switching device reflows the layout automatically (only Compact is offered on a phone). The rotating centre panel always turns the **shorter way** as play moves clockwise, so it never does a disorienting full spin, and South stays upright.
 
 **Double-sided bid cards.** Each bid card shows its value in opposite corners (like a playing card), with a central suit pip, so a seat's bids can be read from across the table as well, not just by the owning player.
 

@@ -460,22 +460,26 @@ flowchart TD
     Override["Preview override (dev only) — Auto / Desktop / Mobile"] --> Dev
     Dev --> Disp["effectiveDisplay(): phone -> Compact; tablet/desktop -> saved layout"]
     Disp --> Layout{Bidding layout}
-    Layout --> Auto["Auto-rotate: centre grid rotates to face the bidder (RotateWrap + useFacingAngle, shortest path)"]
-    Layout --> Four["Four grids: fixed grid per edge, nothing rotates (vertigo-safe)"]
-    Auto --> Fit1["useFitAutoGrid: measure free space between seat strips, scale grid to fill"]
-    Four --> Fit2["useFitFourGrids: scale the 4-grid cluster to fit any screen"]
+    Layout --> Compact["Compact: two-row levels (4+3) + suits + Pass/X/XX"]
+    Layout --> Full["Full: auto-scroll 7-row grid (one-tap cells), pinned Pass row"]
+    Layout --> Four["Four grids: edge-pinned grid per seat; active grows in place; nothing rotates"]
+    Compact --> Band["Reserved-band system caps the grid to the centre region between seat strips"]
+    Full --> Band
 ```
 
 - **Viewport-driven:** the app reacts to real window size; the on-screen
   Auto/Desktop/Mobile toggle is a **dev-only** preview override.
-- **Fluid sizing:** `clamp()`/`vmin` for cells, tap targets, seat anchors, and the
-  trick counter, so the layout flexes continuously phone → large tablet.
-- **Fit-to-screen:** the active centre grid (auto-rotate) and the four-grids
-  cluster are measured and scaled to fill available space without clipping or
-  overlapping the seat strips.
-- **Rotation:** `useFacingAngle` accumulates a continuous angle so the centre
-  panel always turns the shorter way (≤180°) following clockwise play — no long
-  spins; South stays upright.
+- **Reserved-band system (no overlap):** one band per edge holds that seat's
+  history strip; the grid is a fixed-shape block capped (via container-query
+  units) to the centre region between opposing bands, on **both** axes so a 90°
+  rotation never collides. Four-grids pins history at the edge and the grid
+  inboard, so the active grid grows toward the centre and never displaces the
+  fixed history. This is pure CSS — no JS measuring.
+- **Fluid sizing:** `clamp()` + container-query units so every grid/card scales
+  with the band as the screen shrinks; index font never below the 12px floor.
+- **Rotation:** the single-grid block rotates to face the bidder via
+  `useFacingAngle` — a continuous angle that always turns the shorter way (≤180°)
+  following clockwise play; South stays upright. Four-grids never rotates.
 - **Double-sided cards:** each bid card shows its index in opposite corners (like
   a playing card) plus a central suit pip, so its bid reads from both the seat and
   the opposite side without a second stacked card.
