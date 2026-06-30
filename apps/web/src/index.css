@@ -30,11 +30,12 @@ body{background:#0d0d0f;color:var(--ink);font-family:var(--font-body);-webkit-fo
 .gc-reason{display:block;font-size:.62rem;color:var(--ink-dim);font-weight:600;margin-top:2px}
 /* slim seat cards on a phone so the centre grid has room to grow */
 [data-device="mobile"] .bid-seat{padding:6px 8px;gap:7px;border-width:2px}
-[data-device="mobile"] .bc-card{width:38px;height:50px}
-[data-device="mobile"] .bc-cnr-lvl{font-size:.9rem}
-[data-device="mobile"] .bc-cnr-suit{font-size:.7rem}
-[data-device="mobile"] .bc-cnr-word{font-size:.66rem}
-[data-device="mobile"] .bc-pip{display:none}
+[data-device="mobile"] .mc-card{width:46px;height:64px}
+[data-device="mobile"] .mc-idx .mc-lvl{font-size:14px}
+[data-device="mobile"] .mc-idx .mc-suit{font-size:12px}
+[data-device="mobile"] .mc-centre{font-size:20px}
+[data-device="mobile"] .mc-centre--nt{font-size:16px}
+[data-device="mobile"] .mc-card--call .mc-word--mid{font-size:15px}
 [data-device="mobile"] .bc-name{font-size:.82rem}
 [data-device="mobile"] .bc-back{width:36px;height:36px;font-size:1.15rem}
 [data-device="mobile"] .seat-pos--west{left:34px}
@@ -214,7 +215,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .fg-seat--west,.fg-seat--east{align-items:center;justify-content:center}
 .fg-block{display:flex;flex-direction:column;align-items:center;gap:8px}
 .fg-bids{display:flex;align-items:center;gap:8px;min-height:46px;flex-wrap:wrap;justify-content:center;max-width:340px}
-.fgb-card{background:var(--surface-2);border-radius:10px;padding:6px 13px;font-weight:800;font-size:1.55rem;display:inline-flex;align-items:center;gap:3px;line-height:1}
 .fgb-empty{color:var(--ink-dim);font-size:.95rem;font-weight:600}
 .fgb-more{color:var(--ink-dim);font-size:.95rem;font-weight:700}
 .trick-split{flex:1;display:flex;flex-direction:column;min-height:0}
@@ -285,17 +285,28 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .bc-turn{display:block;font-size:.68rem;font-weight:700;color:var(--accent)}
 .bid-seat--active .bc-name{color:var(--accent)}
 .bc-cards{display:flex;flex-direction:row;align-items:center;gap:8px}
-/* mirrored-corner bid card: index in opposite corners + central suit pip, so a
-   single card reads from both this seat and the opposite side. */
-.bc-card{position:relative;width:50px;height:66px;background:var(--surface-2);border-radius:10px;border:2px solid transparent;flex:0 0 auto;overflow:hidden}
-.bc-card--newest{border-color:var(--accent)}
-.bc-corner{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:1;font-weight:800;gap:1px}
-.bc-corner--tl{top:5px;left:6px}
-.bc-corner--br{right:6px;bottom:5px;transform:rotate(180deg)}
-.bc-cnr-lvl{font-size:1.05rem}
-.bc-cnr-suit{font-size:.85rem;line-height:1}
-.bc-cnr-word{font-size:.85rem;font-weight:800}
-.bc-pip{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;font-weight:800;opacity:.9;pointer-events:none}
+/* Mirrored-corner bid card — playing-card style: level+suit index in two opposite
+   corners (one rotated 180°) + a large centre glyph, so it reads from both long
+   sides of the table. See docs "Bid Card Design — Mirrored Corners". */
+.mc-card{position:relative;width:62px;height:86px;background:var(--surface-2);border:2px solid transparent;border-radius:11px;flex:0 0 auto}
+.mc-card--newest{border-color:var(--accent)}
+.mc-idx{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:.86;font-weight:800}
+.mc-idx .mc-lvl{font-size:18px}
+.mc-idx .mc-suit{font-size:15px}
+.mc-idx--tl{top:6px;left:7px}
+.mc-idx--br{bottom:6px;right:7px;transform:rotate(180deg)}
+.mc-centre{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:800;line-height:1}
+.mc-centre--nt{font-size:21px}
+.mc-card--call .mc-word{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:800;color:var(--ink-dim)}
+.mc-card--call .mc-word--top{top:9px;transform:translateX(-50%) rotate(180deg)}
+.mc-card--call .mc-word--bot{bottom:9px}
+.mc-card--call .mc-word--mid{top:50%;transform:translate(-50%,-50%);font-size:17px;color:var(--ink)}
+/* four-grids strips are smaller */
+.fg-bids .mc-card{width:52px;height:72px}
+.fg-bids .mc-idx .mc-lvl{font-size:15px}
+.fg-bids .mc-idx .mc-suit{font-size:13px}
+.fg-bids .mc-centre{font-size:22px}
+.fg-bids .mc-centre--nt{font-size:18px}
 .bc-more{color:var(--ink-dim);font-size:.85rem;font-weight:700;padding:0 4px}
 .bc-empty{color:var(--ink-dim);font-size:.95rem;padding:8px 14px;min-height:48px;display:grid;place-items:center}
 .bc-back{width:52px;height:52px;border-radius:50%;background:transparent;color:var(--ink);font-size:1.45rem;display:grid;place-items:center;flex:0 0 auto;border:2px solid var(--line)}
@@ -346,11 +357,13 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 [data-accessible="true"] .compact-hint{font-size:1.25rem}
 [data-accessible="true"] .row-label{font-size:1.5rem}
 /* per-seat bid cards */
-[data-accessible="true"] .bc-card{width:60px;height:80px}
-[data-accessible="true"] .bc-cnr-lvl{font-size:1.5rem}
-[data-accessible="true"] .bc-cnr-suit{font-size:1.1rem}
-[data-accessible="true"] .bc-cnr-word{font-size:1.2rem}
-[data-accessible="true"] .bc-pip{font-size:2.1rem}
+[data-accessible="true"] .mc-card{width:70px;height:96px}
+[data-accessible="true"] .mc-idx .mc-lvl{font-size:24px}
+[data-accessible="true"] .mc-idx .mc-suit{font-size:20px}
+[data-accessible="true"] .mc-centre{font-size:36px}
+[data-accessible="true"] .mc-centre--nt{font-size:28px}
+[data-accessible="true"] .mc-card--call .mc-word{font-size:18px}
+[data-accessible="true"] .mc-card--call .mc-word--mid{font-size:24px}
 /* Pull the seat strips toward the edges so the centre grid has far more room to
    grow (the grid is fit-to-available-space, so this is what actually enlarges it). */
 [data-accessible="true"] .seat-pos--north{top:clamp(36px,6vmin,54px)}

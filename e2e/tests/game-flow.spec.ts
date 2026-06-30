@@ -57,9 +57,9 @@ test('Accessibility mode + mirrored-corner bid cards', async ({ page }, info) =>
 
   await page.getByRole('button', { name: 'Start Game' }).click();
   await page.getByLabel('1 Clubs').click(); // North bids 1♣
-  // North's bid renders as one mirrored-corner card (two index corners).
-  await expect(page.locator('.bc-card')).toHaveCount(1);
-  await expect(page.locator('.bc-corner--br')).toHaveCount(1);
+  // North's bid renders as one mirrored-corner card (two index corners + centre).
+  await expect(page.locator('.mc-card')).toHaveCount(1);
+  await expect(page.locator('.mc-idx--br')).toHaveCount(1);
 });
 
 // Keyboard accessibility: the Settings dialog opens with focus moved into it,

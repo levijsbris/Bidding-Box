@@ -37,47 +37,53 @@ export function CallLabel({ call }: { call: Call }) {
 }
 
 /**
- * A per-seat bid card with mirrored indices in opposite corners (like a real
- * playing card), plus a central suit pip — so the bid reads from both the owning
- * seat and the opposite side without a second stacked card. Sizes are CSS-driven
- * (.bc-* classes) so mobile/accessibility can scale them.
+ * Mirrored-corner bid card — styled like a real playing card: the call appears as
+ * a small index in two opposite corners (one rotated 180°) with a large centre
+ * glyph, so it reads upright from both long sides of the table. No-trump shows
+ * "{level}NT" in the centre; Pass/Double/Redouble render as a duplicated word.
+ * Sizes are CSS-driven (`.mc-*`) so four-grids / mobile / accessibility can scale.
+ * See docs "Bid Card Design — Mirrored Corners".
  */
 export function MirrorCard({ call, newest = false }: { call: Call; newest?: boolean }) {
-  const isBid = call.kind === 'bid';
-  const corner = isBid ? (
+  // Non-bid calls: a duplicated, two-sided word, lighter than a suit bid.
+  if (call.kind !== 'bid') {
+    const word = call.kind === 'pass' ? 'Pass' : call.kind === 'double' ? 'X' : 'XX';
+    const aria = call.kind === 'pass' ? 'Pass' : call.kind === 'double' ? 'Double' : 'Redouble';
+    return (
+      <span
+        className={`mc-card mc-card--call ${newest ? 'mc-card--newest' : ''}`}
+        role="img"
+        aria-label={aria}
+      >
+        <span className="mc-word mc-word--top" aria-hidden="true">{word}</span>
+        <span className="mc-word mc-word--mid" aria-hidden="true">{word}</span>
+        <span className="mc-word mc-word--bot" aria-hidden="true">{word}</span>
+      </span>
+    );
+  }
+
+  const { level, strain } = call;
+  const isNT = strain === 'NT';
+  const colourCls = isRed(strain) ? 'suit-red' : 'suit-black';
+  const index = (
     <>
-      <span className="bc-cnr-lvl">{call.level}</span>
-      <span className={isRed(call.strain) ? 'suit-red bc-cnr-suit' : 'suit-black bc-cnr-suit'}>
-        {STRAIN_SYMBOL[call.strain]}
-      </span>
+      <span className="mc-lvl">{level}</span>
+      <span className={`mc-suit ${colourCls}`}>{isNT ? 'NT' : STRAIN_SYMBOL[strain]}</span>
     </>
-  ) : (
-    <span className="bc-cnr-word">
-      {call.kind === 'double' ? 'X' : call.kind === 'redouble' ? 'XX' : 'Pass'}
-    </span>
   );
-  const label = isBid
-    ? `${call.level} ${STRAIN_LABEL[call.strain]}`
-    : call.kind === 'double'
-      ? 'Double'
-      : call.kind === 'redouble'
-        ? 'Redouble'
-        : 'Pass';
   return (
-    <span className={`bc-card ${newest ? 'bc-card--newest' : ''}`} role="img" aria-label={label}>
-      <span className="bc-corner bc-corner--tl" aria-hidden="true">
-        {corner}
-      </span>
-      {isBid && (
-        <span className="bc-pip" aria-hidden="true">
-          <span className={isRed(call.strain) ? 'suit-red' : 'suit-black'}>
-            {STRAIN_SYMBOL[call.strain]}
-          </span>
-        </span>
+    <span
+      className={`mc-card ${newest ? 'mc-card--newest' : ''}`}
+      role="img"
+      aria-label={`${level} ${STRAIN_LABEL[strain]}`}
+    >
+      <span className="mc-idx mc-idx--tl" aria-hidden="true">{index}</span>
+      {isNT ? (
+        <span className="mc-centre mc-centre--nt">{level}NT</span>
+      ) : (
+        <span className={`mc-centre ${colourCls}`}>{STRAIN_SYMBOL[strain]}</span>
       )}
-      <span className="bc-corner bc-corner--br" aria-hidden="true">
-        {corner}
-      </span>
+      <span className="mc-idx mc-idx--br" aria-hidden="true">{index}</span>
     </span>
   );
 }

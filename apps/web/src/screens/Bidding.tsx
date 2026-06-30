@@ -7,7 +7,6 @@ import {
   STRAINS,
   STRAIN_LABEL,
   SEATS,
-  type BidEntry,
   type Call,
   type Seat,
 } from '../domain';
@@ -333,28 +332,13 @@ function FgSeatBlock({ seat, turn }: { seat: Seat; turn: Seat }) {
           <>
             {more > 0 && <span className="fgb-more">+{more}</span>}
             {shown.map((b, i) => (
-              <span key={i} className="fgb-card">
-                <FgBidLabel entry={b} />
-              </span>
+              <MirrorCard key={i} call={b.call} />
             ))}
           </>
         )}
       </div>
       <MiniGrid seat={seat} turn={turn} />
     </div>
-  );
-}
-
-function FgBidLabel({ entry }: { entry: BidEntry }) {
-  const { call } = entry;
-  if (call.kind === 'pass') return <>P</>;
-  if (call.kind === 'double') return <>X</>;
-  if (call.kind === 'redouble') return <>XX</>;
-  return (
-    <>
-      {call.level}
-      <Suit strain={call.strain} size={22} />
-    </>
   );
 }
 
