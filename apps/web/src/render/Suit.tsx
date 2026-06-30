@@ -36,15 +36,48 @@ export function CallLabel({ call }: { call: Call }) {
   );
 }
 
-/** Larger stacked label for per-seat bid cards: level on top, suit below. */
-export function BigCallLabel({ call }: { call: Call }) {
-  if (call.kind === 'pass') return <span className="bc-word">Pass</span>;
-  if (call.kind === 'double') return <span className="bc-word">X</span>;
-  if (call.kind === 'redouble') return <span className="bc-word">XX</span>;
+/**
+ * A per-seat bid card with mirrored indices in opposite corners (like a real
+ * playing card), plus a central suit pip — so the bid reads from both the owning
+ * seat and the opposite side without a second stacked card. Sizes are CSS-driven
+ * (.bc-* classes) so mobile/accessibility can scale them.
+ */
+export function MirrorCard({ call, newest = false }: { call: Call; newest?: boolean }) {
+  const isBid = call.kind === 'bid';
+  const corner = isBid ? (
+    <>
+      <span className="bc-cnr-lvl">{call.level}</span>
+      <span className={isRed(call.strain) ? 'suit-red bc-cnr-suit' : 'suit-black bc-cnr-suit'}>
+        {STRAIN_SYMBOL[call.strain]}
+      </span>
+    </>
+  ) : (
+    <span className="bc-cnr-word">
+      {call.kind === 'double' ? 'X' : call.kind === 'redouble' ? 'XX' : 'Pass'}
+    </span>
+  );
+  const label = isBid
+    ? `${call.level} ${STRAIN_LABEL[call.strain]}`
+    : call.kind === 'double'
+      ? 'Double'
+      : call.kind === 'redouble'
+        ? 'Redouble'
+        : 'Pass';
   return (
-    <span className="bc-bid">
-      <span className="bc-lvl">{call.level}</span>
-      <Suit strain={call.strain} size={24} />
+    <span className={`bc-card ${newest ? 'bc-card--newest' : ''}`} role="img" aria-label={label}>
+      <span className="bc-corner bc-corner--tl" aria-hidden="true">
+        {corner}
+      </span>
+      {isBid && (
+        <span className="bc-pip" aria-hidden="true">
+          <span className={isRed(call.strain) ? 'suit-red' : 'suit-black'}>
+            {STRAIN_SYMBOL[call.strain]}
+          </span>
+        </span>
+      )}
+      <span className="bc-corner bc-corner--br" aria-hidden="true">
+        {corner}
+      </span>
     </span>
   );
 }

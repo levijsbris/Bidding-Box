@@ -476,8 +476,9 @@ flowchart TD
 - **Rotation:** `useFacingAngle` accumulates a continuous angle so the centre
   panel always turns the shorter way (≤180°) following clockwise play — no long
   spins; South stays upright.
-- **Double-sided strips:** on the table view each seat's bid strip also renders a
-  180°-mirrored copy so its bids read from the opposite side.
+- **Double-sided cards:** each bid card shows its index in opposite corners (like
+  a playing card) plus a central suit pip, so its bid reads from both the seat and
+  the opposite side without a second stacked card.
 
 ---
 

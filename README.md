@@ -92,7 +92,7 @@ Treated as acceptance criteria, not polish, and held to **WCAG 2.1/2.2 AA**:
 - **Extra-large mode** — a Settings toggle that scales text, controls, and the
   bidding grid up across every screen for low vision / limited dexterity (works
   alongside any bidding layout; Compact gives the largest targets).
-- **Double-sided bid strips** — on the table view each seat's bids also render
-  180°-mirrored so they're readable from the opposite side.
+- **Double-sided bid cards** — each card shows its index in opposite corners
+  (like a playing card) so a seat's bids read from the opposite side too.
 - **Rotation** — the centre panel always turns the shorter way (≤180°) following
   the clockwise play order, so it never does a disorienting long spin.

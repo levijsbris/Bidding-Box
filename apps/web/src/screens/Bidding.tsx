@@ -15,7 +15,7 @@ import { useGame } from '../state/GameContext';
 import { TopBar } from '../components/TopBar';
 import { RotateWrap } from '../render/RotateWrap';
 import { useFacingAngle } from '../render/useFacingAngle';
-import { Suit, BigCallLabel } from '../render/Suit';
+import { Suit, MirrorCard } from '../render/Suit';
 
 export function Bidding() {
   const { state, display } = useGame();
@@ -110,10 +110,10 @@ function useFitAutoGrid(
     };
     const W = layout.clientWidth;
     const H = layout.clientHeight;
-    const west = rectOf('.seat-pos--west .bid-seat-stack');
-    const east = rectOf('.seat-pos--east .bid-seat-stack');
-    const north = rectOf('.seat-pos--north .bid-seat-stack');
-    const south = rectOf('.seat-pos--south .bid-seat-stack');
+    const west = rectOf('.seat-pos--west .bid-seat');
+    const east = rectOf('.seat-pos--east .bid-seat');
+    const north = rectOf('.seat-pos--north .bid-seat');
+    const south = rectOf('.seat-pos--south .bid-seat');
 
     const margin = 14;
     const freeW = (east ? east.left : W) - (west ? west.right : 0) - margin * 2;
@@ -264,54 +264,37 @@ function SeatCard({ seat, turn }: { seat: Seat; turn: Seat }) {
   const lastBidder = bids.length ? bids[bids.length - 1].seat : null;
   const isLastBidder = lastBidder === seat;
   const canUndo = bids.length > 0;
-  // On the table (non-mobile) each strip is double-sided: a 180°-mirrored copy of
-  // the cards so this seat's bids are readable from the opposite side too.
-  const doubleSided = !deviceMobile && mine.length > 0;
 
-  const cards = (
-    <div className="bc-cards">
-      {mine.length === 0 ? (
-        <div className="bc-empty">—</div>
-      ) : (
-        <>
-          {more > 0 && <span className="bc-more">+{more}</span>}
-          {mine.map((b, i) => {
-            const isNewest = isLastBidder && i === mine.length - 1;
-            return (
-              <span key={i} className={`bc-card ${isNewest ? 'bc-card--newest' : ''}`}>
-                <BigCallLabel call={b.call} />
-              </span>
-            );
-          })}
-        </>
-      )}
-    </div>
-  );
-
+  // Each card is double-sided via mirrored corners (see MirrorCard), so a single
+  // strip is readable from both this seat and the opposite side.
   return (
-    <div className="bid-seat-stack">
-      <div className={`bid-seat ${active ? 'bid-seat--active' : ''}`}>
-        <div className="bc-head">
-          <button
-            className={`bc-back ${isLastBidder ? 'bc-back--live' : ''}`}
-            disabled={!canUndo}
-            onClick={undo}
-            aria-label={`Undo last bid (${seat})`}
-          >
-            ↺
-          </button>
-          <div className="bc-name">
-            {seat}
-            {active && <span className="bc-turn">to bid</span>}
-          </div>
+    <div className={`bid-seat ${active ? 'bid-seat--active' : ''}`}>
+      <div className="bc-head">
+        <button
+          className={`bc-back ${isLastBidder ? 'bc-back--live' : ''}`}
+          disabled={!canUndo}
+          onClick={undo}
+          aria-label={`Undo last bid (${seat})`}
+        >
+          ↺
+        </button>
+        <div className="bc-name">
+          {seat}
+          {active && <span className="bc-turn">to bid</span>}
         </div>
-        {cards}
       </div>
-      {doubleSided && (
-        <div className="bid-seat bid-seat--mirror" aria-hidden="true">
-          {cards}
-        </div>
-      )}
+      <div className="bc-cards">
+        {mine.length === 0 ? (
+          <div className="bc-empty">—</div>
+        ) : (
+          <>
+            {more > 0 && <span className="bc-more">+{more}</span>}
+            {mine.map((b, i) => (
+              <MirrorCard key={i} call={b.call} newest={isLastBidder && i === mine.length - 1} />
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -120,7 +120,7 @@ In **Four grids** mode the layout is edge-pinned and auto-scales to fit the scre
 
 **Responsive by default.** The app adapts to the actual screen size — resizing the window or switching device reflows the layout automatically (only Compact is offered on a phone). The auto-rotate centre panel and the four-grids cluster scale to fill the available space without clipping. The rotating centre panel always turns the **shorter way** as play moves clockwise, so it never does a disorienting full spin, and South stays upright.
 
-**Double-sided bid strips.** On the table view each seat's bid strip is double-sided — its bids are mirrored so they can be read from the opposite side of the table as well, not just by the owning player.
+**Double-sided bid cards.** Each bid card shows its value in opposite corners (like a playing card), with a central suit pip, so a seat's bids can be read from across the table as well, not just by the owning player.
 
 ### 6.3 Accessibility features
 
@@ -215,7 +215,7 @@ Grouped by player need. Each is phrased as *As a … I want … so that …* wit
 *As a player on any side of the table, I want to read the bidding without rotating the device so that I can follow along comfortably.*
 - Content faces each seat (rotated, or fixed-per-edge in Four grids mode).
 - Each seat sees its own bid history at a readable size.
-- On the table view, bid strips are double-sided so a seat's bids can also be read from the opposite side.
+- Bid cards show mirrored corner indices so a seat's bids can also be read from the opposite side.
 
 **US-6 — Undo a mistake**
 *As any player, I want to undo the last call so that a misclick can be corrected without restarting.*

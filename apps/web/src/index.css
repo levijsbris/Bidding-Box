@@ -30,9 +30,11 @@ body{background:#0d0d0f;color:var(--ink);font-family:var(--font-body);-webkit-fo
 .gc-reason{display:block;font-size:.62rem;color:var(--ink-dim);font-weight:600;margin-top:2px}
 /* slim seat cards on a phone so the centre grid has room to grow */
 [data-device="mobile"] .bid-seat{padding:6px 8px;gap:7px;border-width:2px}
-[data-device="mobile"] .bc-card{min-width:40px;min-height:42px;padding:4px 6px}
-[data-device="mobile"] .bc-lvl{font-size:1.2rem}
-[data-device="mobile"] .bc-word{font-size:1rem}
+[data-device="mobile"] .bc-card{width:38px;height:50px}
+[data-device="mobile"] .bc-cnr-lvl{font-size:.9rem}
+[data-device="mobile"] .bc-cnr-suit{font-size:.7rem}
+[data-device="mobile"] .bc-cnr-word{font-size:.66rem}
+[data-device="mobile"] .bc-pip{display:none}
 [data-device="mobile"] .bc-name{font-size:.82rem}
 [data-device="mobile"] .bc-back{width:36px;height:36px;font-size:1.15rem}
 [data-device="mobile"] .seat-pos--west{left:34px}
@@ -276,9 +278,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .row-flex{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .settings-actions{display:flex;gap:10px;flex-wrap:wrap}
 
-/* double-sided strip: primary (faces seat) + a 180° mirror (faces opposite seat) */
-.bid-seat-stack{display:flex;flex-direction:column;align-items:center;gap:8px}
-.bid-seat--mirror{transform:rotate(180deg)}
 .bid-seat{display:flex;flex-direction:row;align-items:center;gap:10px;background:var(--surface);border-radius:16px;padding:10px 12px;border:2px solid transparent}
 .bid-seat--active{border-color:var(--accent)}
 .bc-head{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto}
@@ -286,11 +285,17 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .bc-turn{display:block;font-size:.68rem;font-weight:700;color:var(--accent)}
 .bid-seat--active .bc-name{color:var(--accent)}
 .bc-cards{display:flex;flex-direction:row;align-items:center;gap:8px}
-.bc-card{background:var(--surface-2);border-radius:12px;min-width:56px;min-height:60px;padding:8px 10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid transparent}
+/* mirrored-corner bid card: index in opposite corners + central suit pip, so a
+   single card reads from both this seat and the opposite side. */
+.bc-card{position:relative;width:50px;height:66px;background:var(--surface-2);border-radius:10px;border:2px solid transparent;flex:0 0 auto;overflow:hidden}
 .bc-card--newest{border-color:var(--accent)}
-.bc-bid{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1}
-.bc-lvl{font-size:1.5rem;font-weight:800}
-.bc-word{font-size:1.25rem;font-weight:800}
+.bc-corner{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:1;font-weight:800;gap:1px}
+.bc-corner--tl{top:5px;left:6px}
+.bc-corner--br{right:6px;bottom:5px;transform:rotate(180deg)}
+.bc-cnr-lvl{font-size:1.05rem}
+.bc-cnr-suit{font-size:.85rem;line-height:1}
+.bc-cnr-word{font-size:.85rem;font-weight:800}
+.bc-pip{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;font-weight:800;opacity:.9;pointer-events:none}
 .bc-more{color:var(--ink-dim);font-size:.85rem;font-weight:700;padding:0 4px}
 .bc-empty{color:var(--ink-dim);font-size:.95rem;padding:8px 14px;min-height:48px;display:grid;place-items:center}
 .bc-back{width:52px;height:52px;border-radius:50%;background:transparent;color:var(--ink);font-size:1.45rem;display:grid;place-items:center;flex:0 0 auto;border:2px solid var(--line)}
@@ -341,9 +346,17 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 [data-accessible="true"] .compact-hint{font-size:1.25rem}
 [data-accessible="true"] .row-label{font-size:1.5rem}
 /* per-seat bid cards */
-[data-accessible="true"] .bc-card{min-width:62px;min-height:68px}
-[data-accessible="true"] .bc-lvl{font-size:1.9rem}
-[data-accessible="true"] .bc-word{font-size:1.6rem}
+[data-accessible="true"] .bc-card{width:60px;height:80px}
+[data-accessible="true"] .bc-cnr-lvl{font-size:1.5rem}
+[data-accessible="true"] .bc-cnr-suit{font-size:1.1rem}
+[data-accessible="true"] .bc-cnr-word{font-size:1.2rem}
+[data-accessible="true"] .bc-pip{font-size:2.1rem}
+/* Pull the seat strips toward the edges so the centre grid has far more room to
+   grow (the grid is fit-to-available-space, so this is what actually enlarges it). */
+[data-accessible="true"] .seat-pos--north{top:clamp(36px,6vmin,54px)}
+[data-accessible="true"] .seat-pos--south{bottom:clamp(44px,8vmin,64px)}
+[data-accessible="true"] .seat-pos--west{left:clamp(36px,7vmin,64px)}
+[data-accessible="true"] .seat-pos--east{right:clamp(36px,7vmin,64px)}
 [data-accessible="true"] .bc-name{font-size:1.25rem}
 [data-accessible="true"] .bc-back{width:58px;height:58px;font-size:1.5rem}
 /* contract card + role badges */

@@ -45,10 +45,10 @@ test('F8: palette and settings overlay open', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'New Game' })).toBeVisible();
 });
 
-// Extra-large mode flips data-accessible; on the table each seat's bid strip is
-// double-sided (a mirrored copy for the opposite side).
-test('Accessibility mode + double-sided bid strips', async ({ page }, info) => {
-  test.skip(info.project.name === 'phone', 'table layout; double-sided is off on phones');
+// Extra-large mode flips data-accessible; bid cards have mirrored corners so they
+// read from both sides.
+test('Accessibility mode + mirrored-corner bid cards', async ({ page }, info) => {
+  test.skip(info.project.name === 'phone', 'uses the full grid to place a bid');
   await page.goto('/');
   await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByRole('switch', { name: 'Extra-large mode' }).click();
@@ -57,8 +57,9 @@ test('Accessibility mode + double-sided bid strips', async ({ page }, info) => {
 
   await page.getByRole('button', { name: 'Start Game' }).click();
   await page.getByLabel('1 Clubs').click(); // North bids 1♣
-  // North now has a mirrored (aria-hidden) copy of its strip.
-  await expect(page.locator('.bid-seat--mirror')).toHaveCount(1);
+  // North's bid renders as one mirrored-corner card (two index corners).
+  await expect(page.locator('.bc-card')).toHaveCount(1);
+  await expect(page.locator('.bc-corner--br')).toHaveCount(1);
 });
 
 // Keyboard accessibility: the Settings dialog opens with focus moved into it,

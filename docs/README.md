@@ -89,7 +89,7 @@ GitHub Pages deploys automatically from `main` (see `.github/workflows/pages.yml
 - **Responsive**: adapts to the real viewport (no manual toggle needed). ✔
 - **Accessibility extra-large mode**; focus-managed dialogs; live regions; zoom
   enabled; axe-clean across palettes. ✔
-- **Double-sided bid strips**; **shortest-path** centre-panel rotation. ✔
+- **Double-sided bid cards** (mirrored corners); **shortest-path** centre-panel rotation. ✔
 - Undo from any seat; offline persistence and resume after reload; JSON
   export/import. ✔
 - Installable PWA with iOS standalone support. ✔
