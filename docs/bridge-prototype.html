@@ -369,7 +369,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .compact .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqmin}
 .compact .levels .gb{height:clamp(60px,12cqmin,104px);font-size:clamp(28px,6cqmin,48px)}
 .compact .suits{display:grid;grid-template-columns:repeat(5,1fr);gap:2cqmin}
-.compact .suits .gb{height:clamp(60px,12.5cqmin,108px);font-size:clamp(28px,6.2cqmin,50px)}
+.compact .suits .gb{height:clamp(60px,12.5cqmin,108px);font-size:clamp(24px,4.6cqmin,38px)}
 .compact .passrow{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:2cqmin}
 .compact .passrow .gb{height:clamp(46px,8cqmin,64px);font-size:clamp(16px,2.6cqmin,22px)}
 .full{--gridMax:580px;width:min(var(--gridMax),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)),calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)));max-height:min(calc(100cqh - 2*var(--bandEnd) - 2*var(--gap)),calc(100cqw - 2*var(--bandSide) - 2*var(--gap)));display:flex;flex-direction:column;gap:1.4cqmin}
@@ -378,7 +378,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .full .scrollwrap[data-anim="on"]{scroll-behavior:smooth}
 .full .grid{display:grid;grid-template-columns:clamp(34px,5cqmin,52px) repeat(5,1fr);gap:clamp(8px,1.4cqmin,12px)}
 .full .rowlabel{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink-dim);font-size:clamp(20px,3.4cqmin,28px);scroll-margin-top:4px}
-.full .grid .gb{height:clamp(48px,8.5cqmin,76px);font-size:clamp(22px,4.4cqmin,34px)}
+.full .grid .gb{height:clamp(48px,8.5cqmin,76px);font-size:clamp(20px,3.6cqmin,30px)}
 .full .passrow{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:clamp(8px,1.4cqmin,12px);flex:0 0 auto}
 .full .passrow .gb{height:clamp(44px,7cqmin,58px);font-size:clamp(16px,2.6cqmin,20px)}
 .seat{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid transparent;border-radius:18px;padding:10px 12px}
@@ -393,14 +393,17 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .undo--live{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
 .fourwrap{position:absolute;inset:0}
 .fg-pos{position:absolute;transition:all .4s cubic-bezier(.4,0,.2,1)}
-.fgh-n{top:10px;left:50%;transform:translateX(-50%) rotate(180deg)}
-.fgh-s{bottom:10px;left:50%;transform:translateX(-50%)}
-.fgh-w{left:14px;top:50%;transform:translateY(-50%) rotate(90deg)}
-.fgh-e{right:14px;top:50%;transform:translateY(-50%) rotate(-90deg)}
-.fgg-n{top:var(--fgGridOffset);left:50%;transform:translateX(-50%) rotate(180deg)}
-.fgg-s{bottom:var(--fgGridOffset);left:50%;transform:translateX(-50%)}
-.fgg-w{left:var(--fgGridOffset);top:50%;transform:translateY(-50%) rotate(90deg)}
-.fgg-e{right:var(--fgGridOffset);top:50%;transform:translateY(-50%) rotate(-90deg)}
+.fgh-n,.fgh-s{left:0;right:0;height:var(--bandEnd);display:flex;align-items:center;justify-content:center}
+.fgh-w,.fgh-e{top:0;bottom:0;width:var(--bandSide);display:flex;align-items:center;justify-content:center}
+.fgh-n{top:0}.fgh-s{bottom:0}.fgh-w{left:0}.fgh-e{right:0}
+.fg-pos .fg-hist{flex:0 0 auto}
+.fgh-n .fg-hist{transform:rotate(180deg)}
+.fgh-w .fg-hist{transform:rotate(90deg)}
+.fgh-e .fg-hist{transform:rotate(-90deg)}
+.fgg-n{top:calc(var(--bandEnd) + var(--gap));left:50%;transform:translateX(-50%) rotate(180deg)}
+.fgg-s{bottom:calc(var(--bandEnd) + var(--gap));left:50%;transform:translateX(-50%)}
+.fgg-w{left:calc(var(--bandSide) + var(--gap));top:50%;transform:translateY(-50%) rotate(90deg)}
+.fgg-e{right:calc(var(--bandSide) + var(--gap));top:50%;transform:translateY(-50%) rotate(-90deg)}
 .mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;opacity:.55;transition:opacity .2s,padding .2s;width:min(260px,calc(100cqw - 2*var(--bandSide) - 4*var(--gap)));box-sizing:border-box}
 .mini.active{opacity:1;box-shadow:0 0 0 2px var(--accent);padding:14px;width:min(380px,calc(100cqw - 2*var(--bandSide) - 4*var(--gap)),calc((100cqh - 2*var(--bandEnd))*0.62),calc((100cqw - 2*var(--bandSide))*0.62))}
 .mini .nm{font-size:13px;font-weight:800;text-align:center;margin-bottom:7px}
@@ -415,7 +418,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .mini.active .lv{gap:9px;margin-bottom:9px}
 .mini.active .lv .gb{height:clamp(40px,7cqmin,54px);font-size:clamp(20px,3.8cqmin,26px);border-radius:12px}
 .mini.active .su{gap:9px}
-.mini.active .su .gb{height:clamp(42px,7.2cqmin,56px);font-size:clamp(21px,4cqmin,28px);border-radius:12px}
+.mini.active .su .gb{height:clamp(42px,7.2cqmin,56px);font-size:clamp(18px,3.4cqmin,25px);border-radius:12px}
 .mini.active .spec{gap:9px;margin-top:9px}
 .mini.active .spec .gb{height:clamp(36px,5.5cqmin,44px);font-size:clamp(14px,2.6cqmin,17px);border-radius:12px}
 .fg-hist{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 10px}
@@ -430,7 +433,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);out
 .mc-idx--tl{top:7px;left:8px}
 .mc-idx--br{bottom:7px;right:8px;transform:rotate(180deg)}
 .mc-centre{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(26px,3.5cqmin,36px);font-weight:800;line-height:1}
-.mc-centre--nt{font-size:clamp(20px,2.8cqmin,27px)}
+.mc-centre--nt{font-size:clamp(19px,2.7cqmin,28px);letter-spacing:-.02em}
+.mc-suit{line-height:1}
 .mc-card--call .mc-word{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:800;color:var(--ink-dim)}
 .mc-card--call .mc-word--top{top:9px;transform:translateX(-50%) rotate(180deg)}
 .mc-card--call .mc-word--bot{bottom:9px}
@@ -718,8 +722,8 @@ function mcCard(call,newest){
     return `<span class="mc-card mc-card--call${nw}" role="img" aria-label="${aria}"><span class="mc-word mc-word--top" aria-hidden="true">${w}</span><span class="mc-word mc-word--mid" aria-hidden="true">${w}</span><span class="mc-word mc-word--bot" aria-hidden="true">${w}</span></span>`;
   }
   const isNT=call.strain==='NT', cc=isRed(call.strain)?'suit-red':'suit-black';
-  const idx=`<span class="mc-lvl">${call.level}</span><span class="mc-suit ${cc}">${isNT?'NT':STRAIN_SYMBOL[call.strain]}</span>`;
-  const ctr=isNT?`<span class="mc-centre mc-centre--nt">${call.level}NT</span>`:`<span class="mc-centre ${cc}">${STRAIN_SYMBOL[call.strain]}</span>`;
+  const idx=isNT?`<span class="mc-lvl">${call.level}</span>`:`<span class="mc-lvl">${call.level}</span><span class="mc-suit ${cc}">${STRAIN_SYMBOL[call.strain]}</span>`;
+  const ctr=isNT?`<span class="mc-centre mc-centre--nt">NT</span>`:`<span class="mc-centre ${cc}">${STRAIN_SYMBOL[call.strain]}</span>`;
   return `<span class="mc-card${nw}" role="img" aria-label="${call.level} ${STRAIN_LABEL[call.strain]}"><span class="mc-idx mc-idx--tl" aria-hidden="true">${idx}</span>${ctr}<span class="mc-idx mc-idx--br" aria-hidden="true">${idx}</span></span>`;
 }
 

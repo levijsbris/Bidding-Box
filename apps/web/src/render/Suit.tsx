@@ -65,10 +65,14 @@ export function MirrorCard({ call, newest = false }: { call: Call; newest?: bool
   const { level, strain } = call;
   const isNT = strain === 'NT';
   const colourCls = isRed(strain) ? 'suit-red' : 'suit-black';
-  const index = (
+  // Suit bids show level + suit in the corners; NT shows just the level (the big
+  // "NT" lives in the centre), so an NT card isn't cluttered with three "NT"s.
+  const index = isNT ? (
+    <span className="mc-lvl">{level}</span>
+  ) : (
     <>
       <span className="mc-lvl">{level}</span>
-      <span className={`mc-suit ${colourCls}`}>{isNT ? 'NT' : STRAIN_SYMBOL[strain]}</span>
+      <span className={`mc-suit ${colourCls}`}>{STRAIN_SYMBOL[strain]}</span>
     </>
   );
   return (
@@ -79,7 +83,7 @@ export function MirrorCard({ call, newest = false }: { call: Call; newest?: bool
     >
       <span className="mc-idx mc-idx--tl" aria-hidden="true">{index}</span>
       {isNT ? (
-        <span className="mc-centre mc-centre--nt">{level}NT</span>
+        <span className="mc-centre mc-centre--nt">NT</span>
       ) : (
         <span className={`mc-centre ${colourCls}`}>{STRAIN_SYMBOL[strain]}</span>
       )}
