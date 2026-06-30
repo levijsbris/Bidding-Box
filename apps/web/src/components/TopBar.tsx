@@ -1,4 +1,5 @@
 import { useGame } from '../state/GameContext';
+import { GearIcon } from '../render/icons';
 
 /** Shared header: vulnerability pills, an optional centre label, running totals,
  *  and the settings cog. */
@@ -32,7 +33,7 @@ export function TopBar({ centerLabel }: { centerLabel?: string }) {
         </>
       )}
       <button className="icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
-        ⚙
+        <GearIcon />
       </button>
     </div>
   );
